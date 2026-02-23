@@ -16,13 +16,16 @@
 
         /* Table Design */
         table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 20px; }
-        th { text-align: left; border-bottom: 2px solid #000; padding: 10px; font-size: 0.8em; background: #fff; position: sticky; top: 0; }
+        th { text-align: left; border-bottom: 2px solid #000; padding: 10px; font-size: 0.8em; background: #fff; position: sticky; top: 0; user-select: none; }
         td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
         /* Column Widths */
-        .col-title { width: 45%; }
+        .col-title { width: 45%; cursor: pointer; }
         .col-author { width: 35%; }
-        .col-year { width: 20%; }
+        .col-year { width: 20%; cursor: pointer; }
+
+        /* Hover effects for clickable headers */
+        .col-title:hover, .col-year:hover { background: #f0f0f0; }
 
         .letter-divider { background: #000; color: #fff; padding: 5px 10px; font-weight: bold; }
         a { color: #000; text-decoration: none; font-weight: bold; }
@@ -40,17 +43,59 @@
     <table>
         <thead>
             <tr>
-                <th class="col-title">TITLE</th>
+                <th class="col-title" onclick="sortBy('title')" title="Click to sort by Title">TITLE ↕️</th>
                 <th class="col-author">AUTHOR/AUTHOR'S</th>
-                <th class="col-year">YEAR</th>
+                <th class="col-year" onclick="sortBy('year')" title="Click to sort by Year">YEAR ↕️</th>
             </tr>
         </thead>
         <tbody id="library-body">
-            </tbody>
+        </tbody>
     </table>
 
     <script>
         let archiveData = [];
+        let currentSort = 'title';
+        let sortAscending = true;
+
+        // Function to convert string years (like "375 BC" or "1838") into numbers for accurate sorting
+        function parseYear(yearStr) {
+            let isBC = yearStr.toUpperCase().includes('BC');
+            // Extract just the numbers
+            let num = parseInt(yearStr.replace(/[^0-9]/g, ''));
+            // If there's no number (e.g. "N/A"), push it to the end
+            if (isNaN(num)) return 999999;
+            // Make BC years negative so they sort before AD years
+            return isBC ? -num : num;
+        }
+
+        // Sorting Logic
+        function sortBy(field) {
+            if (currentSort === field) {
+                // If clicking the same column, reverse the direction
+                sortAscending = !sortAscending;
+            } else {
+                // If clicking a new column, set it to ascending by default
+                currentSort = field;
+                sortAscending = true;
+            }
+
+            archiveData.sort((a, b) => {
+                if (field === 'year') {
+                    let yearA = parseYear(a.y);
+                    let yearB = parseYear(b.y);
+                    return sortAscending ? (yearA - yearB) : (yearB - yearA);
+                } else {
+                    // Title Sorting
+                    let titleA = a.t.toLowerCase();
+                    let titleB = b.t.toLowerCase();
+                    if (titleA < titleB) return sortAscending ? -1 : 1;
+                    if (titleA > titleB) return sortAscending ? 1 : -1;
+                    return 0;
+                }
+            });
+
+            render();
+        }
 
         function render() {
             const term = document.getElementById('searchInput').value.toUpperCase();
@@ -59,18 +104,22 @@
             let count = 0;
             let currentLetter = '';
 
+            // Only show the alphabetical letter dividers if we are currently sorted by Title (A-Z)
+            const showDividers = (currentSort === 'title' && sortAscending === true);
+
             archiveData.forEach(book => {
                 if (book.t.toUpperCase().includes(term) || book.a.toUpperCase().includes(term) || book.y.toUpperCase().includes(term)) {
                     
-                    // Optional: Add alphabetical dividers
-                    const firstChar = book.t[0].toUpperCase();
-                    if (firstChar !== currentLetter && term === "") {
-                        currentLetter = firstChar;
-                        html += `<tr><td colspan="3" class="letter-divider">${currentLetter}</td></tr>`;
+                    if (showDividers) {
+                        const firstChar = book.t[0].toUpperCase();
+                        if (firstChar !== currentLetter && term === "") {
+                            currentLetter = firstChar;
+                            html += `<tr><td colspan="3" class="letter-divider">${currentLetter}</td></tr>`;
+                        }
                     }
 
                     html += `<tr>
-                        <td><a href="pdfs/${book.f}" target="_blank">${book.t}</a></td>
+                        <td><a href="pdfs/${encodeURIComponent(book.f)}" target="_blank">${book.t}</a></td>
                         <td>${book.a}</td>
                         <td>${book.y}</td>
                     </tr>`;
@@ -82,11 +131,14 @@
             document.getElementById('book-count').innerText = count;
         }
 
-        // Load the external data.js file
+        // Load the external data.js file with Cache-Busting
         function loadData() {
             const script = document.createElement('script');
-            script.src = 'data.js';
-            script.onload = () => render();
+            script.src = 'data.js?v=' + new Date().getTime();
+            script.onload = () => {
+                // Sort by Title A-Z as soon as the data loads
+                sortBy('title');
+            };
             document.head.appendChild(script);
         }
 
