@@ -13,71 +13,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Rebuild with Sections
+      - name: Update Database File
         run: |
           python -c "
-          import os, re
-          from collections import defaultdict
-          
-          pdf_dir, html_file = 'pdfs', 'index.html'
+          import os, re, json
+          pdf_dir = 'pdfs'
           if not os.path.exists(pdf_dir): os.makedirs(pdf_dir)
-          
           files = sorted([f for f in os.listdir(pdf_dir) if f.endswith('.pdf')])
           
           def get_tag(f, tag):
               match = re.search(rf'{tag}=\[(.*?)\]', f, re.IGNORECASE)
               return match.group(1).strip() if match else 'N/A'
 
-          # Group books by First Letter
-          sections = defaultdict(list)
+          db = []
           for f in files:
               title = get_tag(f, 'Title')
               if title == 'N/A': title = f.replace('.pdf', '')
-              letter = title[0].upper() if title[0].isalpha() else '#'
-              author = get_tag(f, 'Author')
-              year = get_tag(f, 'Year')
-              row = f'<tr><td style=\"width:50%\"><a href=\"pdfs/{f}\" target=\"_blank\">{title}</a></td><td style=\"width:35%\">{author}</td><td style=\"width:15%\">{year}</td></tr>'
-              sections[letter].append(row)
-
-          # Build the HTML Block
-          new_html_block = []
-          for letter in sorted(sections.keys()):
-              new_html_block.append(f'<div class=\"section-group\">')
-              new_html_block.append(f'<div class=\"section-divider\">{letter}</div>')
-              new_html_block.append('<table><tbody>')
-              new_html_block.extend(sections[letter])
-              new_html_block.append('</tbody></table></div>')
+              db.append({
+                  't': title,
+                  'a': get_tag(f, 'Author'),
+                  'y': get_tag(f, 'Year'),
+                  'f': f
+              })
           
-          full_list_html = '\n'.join(new_html_block)
-
-          # Safe Rebuild Logic
-          with open(html_file, 'r', encoding='utf-8') as f:
-              lines = f.readlines()
-
-          start_m, end_m = '', ''
-          if not any(start_m in l for l in lines): exit(1) # Safety abort
-
-          final_output, skip = [], False
-          for line in lines:
-              if start_m in line:
-                  final_output.append(line + '\n' + full_list_html)
-                  skip = True
-              elif end_m in line:
-                  final_output.append(line)
-                  skip = False
-              elif not skip:
-                  if 'id=\"book-count\"' in line:
-                      line = re.sub(r'>.*?</span>', f'>{len(files)}</span>', line)
-                  final_output.append(line)
-
-          with open(html_file, 'w', encoding='utf-8') as f:
-              f.writelines(final_output)
+          # This writes a JavaScript file that the HTML can read
+          with open('data.js', 'w', encoding='utf-8') as f:
+              f.write('archiveData = ' + json.dumps(db) + ';')
           "
 
-      - name: Save
+      - name: Save Data
         run: |
           git config --global user.name 'Archive-Bot'
           git config --global user.email 'bot@github.com'
-          git add index.html
-          git commit -m "Sections Updated" || exit 0
+          git add data.js
+          git commit -m "Database updated" || exit 0
           git push
