@@ -17,9 +17,8 @@
         th { text-align: left; border-bottom: 2px solid #000; padding: 10px; font-size: 0.8em; }
         td { padding: 12px 10px; border-bottom: 1px solid #ddd; font-size: 0.9em; }
         tr.hidden { display: none; }
-        a { color: #000; text-decoration: none; font-weight: bold; border-bottom: 1px solid transparent; }
-        a:hover { border-bottom: 1px solid #000; background: #000; color: #fff; }
-        @media (max-width: 600px) { th:nth-child(3), td:nth-child(3) { display: none; } }
+        a { color: #000; text-decoration: none; font-weight: bold; }
+        a:hover { background: #000; color: #fff; }
     </style>
 </head>
 <body>
@@ -28,7 +27,7 @@
         <h1>Archive_Index</h1>
         <div class="stats">TOTAL_ITEMS: [<span id="book-count">0</span>]</div>
         <div class="search-box">
-            <input type="text" id="searchInput" onkeyup="filterLibrary()" placeholder="TYPE_TO_SEARCH_BY_TITLE_OR_AUTHOR...">
+            <input type="text" id="searchInput" onkeyup="filterLibrary()" placeholder="TYPE_TO_SEARCH...">
         </div>
     </div>
 
