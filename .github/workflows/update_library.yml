@@ -1,29 +1,34 @@
-name: Scan PDFs and Update HTML
+name: Archive Auto-Update
 on:
   push:
     paths:
-      - 'pdfs/**'
+      - 'pdfs/**' # Triggers only when files are added to the pdfs folder
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed to allow the bot to save index.html
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Run Label-Based Scan
+      - name: Scan PDFs and Update HTML
         run: |
           python -c "
           import os, re
           pdf_dir = 'pdfs'
           html_file = 'index.html'
           
+          if not os.path.exists(pdf_dir): os.makedirs(pdf_dir)
+          
+          # Get all PDFs and sort them
           files = sorted([f for f in os.listdir(pdf_dir) if f.endswith('.pdf')])
-          total_books = len(files)
           
           def get_tag(filename, tag):
-              # Searches for Tag: [Content]
-              pattern = rf'{tag}:\s*\[(.*?)\]'
-              match = re.search(pattern, filename)
+              # Regex to find Label=[Content]
+              pattern = rf'{tag}=\[(.*?)\]'
+              match = re.search(pattern, filename, re.IGNORECASE)
               return match.group(1).strip() if match else 'N/A'
 
           rows = ''
@@ -31,31 +36,31 @@ jobs:
               title = get_tag(f, 'Title')
               author = get_tag(f, 'Author')
               year = get_tag(f, 'Year')
-              genre = get_tag(f, 'Genre')
               
-              # If Title is missing, use the filename as a fallback
               if title == 'N/A': title = f.replace('.pdf', '')
-
-              rows += f'<tr><td><a href=\"pdfs/{f}\" style=\"color:inherit;font-weight:bold;\">{title}</a></td><td>{author}</td><td>{year}</td><td><span class=\"genre-tag\">{genre}</span></td></tr>\n'
+              
+              rows += f'<tr><td><a href=\"pdfs/{f}\" target=\"_blank\">{title}</a></td><td>{author}</td><td>{year}</td></tr>\n'
           
+          # Read existing HTML
           with open(html_file, 'r', encoding='utf-8') as h:
               content = h.read()
           
-          # Update List
-          start_mark, end_mark = '', ''
-          content = content.split(start_mark)[0] + start_mark + '\n' + rows + end_mark + content.split(end_mark)[1]
+          # Replace the list section
+          s, e = '', ''
+          content = content.split(s)[0] + s + '\n' + rows + e + content.split(e)[1]
           
-          # Update Counter
-          content = re.sub(r'id=\"book-count\">.*?</span>', f'id=\"book-count\">{total_books}</span>', content)
+          # Update the book count
+          content = re.sub(r'id=\"book-count\">.*?</span>', f'id=\"book-count\">{len(files)}</span>', content)
           
+          # Write the updated HTML back
           with open(html_file, 'w', encoding='utf-8') as h:
               h.write(content)
           "
 
-      - name: Commit changes
+      - name: Save and Push Changes
         run: |
           git config --global user.name 'Archive-Bot'
           git config --global user.email 'bot@github.com'
           git add index.html
-          git commit -m "Automated update: Labels parsed" || exit 0
+          git commit -m "Automated update: Synchronized library metadata" || exit 0
           git push
