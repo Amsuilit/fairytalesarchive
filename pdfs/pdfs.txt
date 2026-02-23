@@ -1,1 +1,9 @@
-Insert PDFs here.
+Insert PDFs here in this folder.
+
+Examples of valid filenames:
+
+Title: [The Great Gatsby] Author: [F. Scott Fitzgerald] Year: [1925] Genre: [Fiction].pdf
+
+Author: [Plato, Socrates] Title: [The Republic] Year: [375 BC] Genre: [Philosophy].pdf
+
+Title: [Two Authors Test] Author: [John Doe & Jane Smith] Year: [2024].pdf
