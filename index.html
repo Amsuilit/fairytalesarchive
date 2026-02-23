@@ -1,60 +1,120 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Digital Library Archive</title>
+
     <style>
+
         :root { --bg: #ffffff; --text: #000000; --border: #000000; }
+
         body { background: var(--bg); color: var(--text); font-family: "Courier New", Courier, monospace; margin: 20px auto; max-width: 1100px; padding: 20px; }
+
         
+
         .header { border-bottom: 3px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+
         .stats { font-weight: bold; font-size: 0.9em; margin-bottom: 10px; }
+
         #searchInput { width: 100%; padding: 12px; border: 2px solid var(--border); font-family: inherit; margin-bottom: 20px; box-sizing: border-box; }
 
+
+
         /* Section Headers */
+
         .section-divider { background: #000; color: #fff; padding: 5px 15px; font-weight: bold; margin-top: 20px; position: sticky; top: 0; z-index: 10; }
 
+
+
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+
         th { text-align: left; border-bottom: 2px solid var(--border); padding: 10px; font-size: 0.8em; background: #fff; }
+
         td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 0.85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
         
+
         a { color: #000; text-decoration: none; font-weight: bold; }
+
         a:hover { background: #000; color: #fff; }
+
     </style>
+
 </head>
+
 <body>
 
+
+
     <div class="header">
+
         <h1>Archive_Index</h1>
+
         <div class="stats">TOTAL_ITEMS: [<span id="book-count">0</span>]</div>
+
         <input type="text" id="searchInput" onkeyup="filterLibrary()" placeholder="SEARCH_ARCHIVE...">
+
     </div>
 
+
+
     <div id="archive-content">
+
 </div>
 
+
+
     <script>
+
         function filterLibrary() {
+
             const input = document.getElementById('searchInput').value.toUpperCase();
+
             const sections = document.querySelectorAll('.section-group');
+
             
+
             sections.forEach(section => {
+
                 let hasVisible = false;
+
                 const rows = section.querySelectorAll('tr');
+
                 rows.forEach(row => {
+
                     const text = row.textContent || row.innerText;
+
                     if (text.toUpperCase().includes(input)) {
+
                         row.style.display = "";
+
                         hasVisible = true;
+
                     } else {
+
                         row.style.display = "none";
+
                     }
+
                 });
+
                 // Hide the entire section (including header) if no books match
+
                 section.style.display = hasVisible ? "" : "none";
+
             });
+
         }
+
     </script>
+
 </body>
+
 </html>
+
