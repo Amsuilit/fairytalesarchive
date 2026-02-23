@@ -1,120 +1,721 @@
 <!DOCTYPE html>
 
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Digital Library Archive</title>
-
-    <style>
-
-        :root { --bg: #ffffff; --text: #000000; --border: #000000; }
-
-        body { background: var(--bg); color: var(--text); font-family: "Courier New", Courier, monospace; margin: 20px auto; max-width: 1100px; padding: 20px; }
-
-        
-
-        .header { border-bottom: 3px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
-
-        .stats { font-weight: bold; font-size: 0.9em; margin-bottom: 10px; }
-
-        #searchInput { width: 100%; padding: 12px; border: 2px solid var(--border); font-family: inherit; margin-bottom: 20px; box-sizing: border-box; }
-
-
-
-        /* Section Headers */
-
-        .section-divider { background: #000; color: #fff; padding: 5px 15px; font-weight: bold; margin-top: 20px; position: sticky; top: 0; z-index: 10; }
-
-
-
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-
-        th { text-align: left; border-bottom: 2px solid var(--border); padding: 10px; font-size: 0.8em; background: #fff; }
-
-        td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 0.85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-        
-
-        a { color: #000; text-decoration: none; font-weight: bold; }
-
-        a:hover { background: #000; color: #fff; }
-
-    </style>
-
-</head>
-
-<body>
-
-
-
-    <div class="header">
-
-        <h1>Archive_Index</h1>
-
-        <div class="stats">TOTAL_ITEMS: [<span id="book-count">0</span>]</div>
-
-        <input type="text" id="searchInput" onkeyup="filterLibrary()" placeholder="SEARCH_ARCHIVE...">
-
-    </div>
-
-
-
-    <div id="archive-content">
-
-</div>
-
-
-
-    <script>
-
-        function filterLibrary() {
-
-            const input = document.getElementById('searchInput').value.toUpperCase();
-
-            const sections = document.querySelectorAll('.section-group');
-
-            
-
-            sections.forEach(section => {
-
-                let hasVisible = false;
-
-                const rows = section.querySelectorAll('tr');
-
-                rows.forEach(row => {
-
-                    const text = row.textContent || row.innerText;
-
-                    if (text.toUpperCase().includes(input)) {
-
-                        row.style.display = "";
-
-                        hasVisible = true;
-
-                    } else {
-
-                        row.style.display = "none";
-
-                    }
-
-                });
-
-                // Hide the entire section (including header) if no books match
-
-                section.style.display = hasVisible ? "" : "none";
-
-            });
-
-        }
-
-    </script>
-
-</body>
-
-</html>
-
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div><html lang="en">
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div><head>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>    <meta charset="UTF-8">
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>    <title>Digital Library Archive</title>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>    <style>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        :root { --bg: #ffffff; --text: #000000; --border: #000000; }
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        body { background: var(--bg); color: var(--text); font-family: "Courier New", Courier, monospace; margin: 20px auto; max-width: 1100px; padding: 20px; }
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        .header { border-bottom: 3px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        .stats { font-weight: bold; font-size: 0.9em; margin-bottom: 10px; }
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        #searchInput { width: 100%; padding: 12px; border: 2px solid var(--border); font-family: inherit; margin-bottom: 20px; box-sizing: border-box; }
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        /* Section Headers */
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        .section-divider { background: #000; color: #fff; padding: 5px 15px; font-weight: bold; margin-top: 20px; position: sticky; top: 0; z-index: 10; }
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        th { text-align: left; border-bottom: 2px solid var(--border); padding: 10px; font-size: 0.8em; background: #fff; }
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 0.85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        a { color: #000; text-decoration: none; font-weight: bold; }
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        a:hover { background: #000; color: #fff; }
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>    </style>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div></head>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div><body>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>    <div class="header">
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        <h1>Archive_Index</h1>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        <div class="stats">TOTAL_ITEMS: [<span id="book-count">0</span>]</div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        <input type="text" id="searchInput" onkeyup="filterLibrary()" placeholder="SEARCH_ARCHIVE...">
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>    </div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>    <div id="archive-content">
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>    <script>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        function filterLibrary() {
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>            const input = document.getElementById('searchInput').value.toUpperCase();
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>            const sections = document.querySelectorAll('.section-group');
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>            
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>            sections.forEach(section => {
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>                let hasVisible = false;
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>                const rows = section.querySelectorAll('tr');
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>                rows.forEach(row => {
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>                    const text = row.textContent || row.innerText;
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>                    if (text.toUpperCase().includes(input)) {
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>                        row.style.display = "";
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>                        hasVisible = true;
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>                    } else {
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>                        row.style.display = "none";
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>                    }
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>                });
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>                // Hide the entire section (including header) if no books match
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>                section.style.display = hasVisible ? "" : "none";
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>            });
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>        }
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>    </script>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div></body>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div></html>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
+
+<div class="section-group">
+<div class="section-divider">T</div>
+<table><tbody>
+<tr><td style="width:50%"><a href="pdfs/Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf" target="_blank">The Republic</a></td><td style="width:35%">Plato, Socrates</td><td style="width:15%">375 BC</td></tr>
+</tbody></table></div>
