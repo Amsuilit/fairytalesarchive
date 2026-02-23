@@ -2,8 +2,8 @@ Insert PDFs here in this folder.
 
 Examples of valid filenames:
 
-Title: [The Great Gatsby] Author: [F. Scott Fitzgerald] Year: [1925] Genre: [Fiction].pdf
+Title=[Untitled Project] Author=[John Doe] Year=[0000].pdf
 
-Author: [Plato, Socrates] Title: [The Republic] Year: [375 BC] Genre: [Philosophy].pdf
+Author=[John Doe] Title=[Untitled Project] Year=[0000].pdf
 
-Title: [Two Authors Test] Author: [John Doe & Jane Smith] Year: [2024].pdf
+Title=[Untitled Project] Author=[John Doe] Year=[0000].pdf
