@@ -2,13 +2,13 @@ name: Archive Auto-Update
 on:
   push:
     paths:
-      - 'pdfs/**' # Triggers only when files are added to the pdfs folder
+      - 'pdfs/**'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Needed to allow the bot to save index.html
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,11 +22,9 @@ jobs:
           
           if not os.path.exists(pdf_dir): os.makedirs(pdf_dir)
           
-          # Get all PDFs and sort them
           files = sorted([f for f in os.listdir(pdf_dir) if f.endswith('.pdf')])
           
           def get_tag(filename, tag):
-              # Regex to find Label=[Content]
               pattern = rf'{tag}=\[(.*?)\]'
               match = re.search(pattern, filename, re.IGNORECASE)
               return match.group(1).strip() if match else 'N/A'
@@ -41,18 +39,20 @@ jobs:
               
               rows += f'<tr><td><a href=\"pdfs/{f}\" target=\"_blank\">{title}</a></td><td>{author}</td><td>{year}</td></tr>\n'
           
-          # Read existing HTML
           with open(html_file, 'r', encoding='utf-8') as h:
               content = h.read()
           
-          # Replace the list section
+          # FIXED: Added the markers here
           s, e = '', ''
+          
+          if s not in content or e not in content:
+              print('Error: Markers not found in index.html')
+              exit(1)
+
           content = content.split(s)[0] + s + '\n' + rows + e + content.split(e)[1]
           
-          # Update the book count
           content = re.sub(r'id=\"book-count\">.*?</span>', f'id=\"book-count\">{len(files)}</span>', content)
           
-          # Write the updated HTML back
           with open(html_file, 'w', encoding='utf-8') as h:
               h.write(content)
           "
