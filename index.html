@@ -1,55 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><title>Digital Archive</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Library Archive</title>
     <style>
-        body { background: #fff; color: #000; font-family: monospace; padding: 20px; max-width: 1100px; margin: auto; }
-        .header { border-bottom: 3px solid #000; margin-bottom: 20px; padding-bottom: 10px; position: sticky; top: 0; background: #fff; z-index: 100; }
-        #searchInput { width: 100%; padding: 12px; border: 2px solid #000; font-family: inherit; margin: 10px 0; }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th { text-align: left; border-bottom: 2px solid #000; padding: 10px; background: #eee; }
-        td { padding: 8px 10px; border-bottom: 1px solid #ddd; font-size: 0.85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .letter-row { background: #000; color: #fff; font-weight: bold; padding: 5px 10px; }
+        :root { --bg: #ffffff; --text: #000000; --accent: #f4f4f4; }
+        body { background: var(--bg); color: var(--text); font-family: "Courier New", Courier, monospace; margin: 20px auto; max-width: 1100px; padding: 20px; line-height: 1.6; }
+        
+        .header { border-bottom: 3px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
+        h1 { margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+        .stats { font-weight: bold; margin-top: 5px; font-size: 0.9em; }
+
+        #searchInput { width: 100%; padding: 12px; border: 2px solid #000; font-family: inherit; outline: none; box-sizing: border-box; margin-top: 15px; }
+
+        /* Table Design */
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 20px; }
+        th { text-align: left; border-bottom: 2px solid #000; padding: 10px; font-size: 0.8em; background: #fff; position: sticky; top: 0; }
+        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        /* Column Widths */
+        .col-title { width: 45%; }
+        .col-author { width: 35%; }
+        .col-year { width: 20%; }
+
+        .letter-divider { background: #000; color: #fff; padding: 5px 10px; font-weight: bold; }
+        a { color: #000; text-decoration: none; font-weight: bold; }
+        a:hover { background: #000; color: #fff; }
     </style>
 </head>
 <body>
+
     <div class="header">
-        <h1>ARCHIVE_SYSTEM_v6</h1>
-        <div>TOTAL_ITEMS: [<span id="book-count">0</span>]</div>
-        <input type="text" id="searchInput" onkeyup="render()" placeholder="SEARCH_ARCHIVE...">
+        <h1>Digital Library Archive</h1>
+        <div class="stats">Total Items: [<span id="book-count">0</span>]</div>
+        <input type="text" id="searchInput" onkeyup="render()" placeholder="Search by title, author, or year...">
     </div>
-    <div id="content">Loading Database...</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="col-title">TITLE</th>
+                <th class="col-author">AUTHOR/AUTHOR'S</th>
+                <th class="col-year">YEAR</th>
+            </tr>
+        </thead>
+        <tbody id="library-body">
+            </tbody>
+    </table>
 
     <script>
         let archiveData = [];
+
         function render() {
             const term = document.getElementById('searchInput').value.toUpperCase();
-            let html = '<table>';
-            let currentLetter = "";
+            const tbody = document.getElementById('library-body');
+            let html = '';
             let count = 0;
+            let currentLetter = '';
 
             archiveData.forEach(book => {
-                if (book.t.toUpperCase().includes(term) || book.a.toUpperCase().includes(term)) {
-                    let firstChar = book.t[0].toUpperCase();
-                    if (firstChar !== currentLetter) {
+                if (book.t.toUpperCase().includes(term) || book.a.toUpperCase().includes(term) || book.y.toUpperCase().includes(term)) {
+                    
+                    // Optional: Add alphabetical dividers
+                    const firstChar = book.t[0].toUpperCase();
+                    if (firstChar !== currentLetter && term === "") {
                         currentLetter = firstChar;
-                        html += `<tr><td colspan="3" class="letter-row">${currentLetter}</td></tr>`;
+                        html += `<tr><td colspan="3" class="letter-divider">${currentLetter}</td></tr>`;
                     }
-                    html += `<tr><td style="width:50%"><a href="pdfs/${book.f}" target="_blank">${book.t}</a></td><td style="width:35%">${book.a}</td><td style="width:15%">${book.y}</td></tr>`;
+
+                    html += `<tr>
+                        <td><a href="pdfs/${book.f}" target="_blank">${book.t}</a></td>
+                        <td>${book.a}</td>
+                        <td>${book.y}</td>
+                    </tr>`;
                     count++;
                 }
             });
-            document.getElementById('content').innerHTML = html + '</table>';
+
+            tbody.innerHTML = html;
             document.getElementById('book-count').innerText = count;
         }
 
-        // Fetch the data from the sidecar file
+        // Load the external data.js file
         function loadData() {
             const script = document.createElement('script');
             script.src = 'data.js';
-            script.onload = () => { render(); };
+            script.onload = () => render();
             document.head.appendChild(script);
         }
+
         window.onload = loadData;
     </script>
 </body>
