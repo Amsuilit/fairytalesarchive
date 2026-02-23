@@ -21,7 +21,6 @@ jobs:
           html_file = 'index.html'
           
           if not os.path.exists(pdf_dir): os.makedirs(pdf_dir)
-          
           files = sorted([f for f in os.listdir(pdf_dir) if f.endswith('.pdf')])
           
           def get_tag(filename, tag):
@@ -34,27 +33,32 @@ jobs:
               title = get_tag(f, 'Title')
               author = get_tag(f, 'Author')
               year = get_tag(f, 'Year')
-              
               if title == 'N/A': title = f.replace('.pdf', '')
-              
               rows += f'<tr><td><a href=\"pdfs/{f}\" target=\"_blank\">{title}</a></td><td>{author}</td><td>{year}</td></tr>\n'
           
           with open(html_file, 'r', encoding='utf-8') as h:
               content = h.read()
           
-          # FIXED: Added the markers here
-          s, e = '', ''
+          # SAFETY CHECK: Define markers clearly
+          start_m = ''
+          end_m = ''
           
-          if s not in content or e not in content:
-              print('Error: Markers not found in index.html')
+          if start_m not in content or end_m not in content:
+              print(f'CRITICAL ERROR: Markers not found in {html_file}')
+              print('Ensure your HTML contains and ')
               exit(1)
 
-          content = content.split(s)[0] + s + '\n' + rows + e + content.split(e)[1]
+          # Perform the split safely
+          parts_before = content.split(start_m)
+          parts_after = content.split(end_m)
           
-          content = re.sub(r'id=\"book-count\">.*?</span>', f'id=\"book-count\">{len(files)}</span>', content)
+          new_html = parts_before[0] + start_m + '\n' + rows + end_m + parts_after[-1]
+          
+          # Update the book count
+          new_html = re.sub(r'id=\"book-count\">.*?</span>', f'id=\"book-count\">{len(files)}</span>', new_html)
           
           with open(html_file, 'w', encoding='utf-8') as h:
-              h.write(content)
+              h.write(new_html)
           "
 
       - name: Save and Push Changes
