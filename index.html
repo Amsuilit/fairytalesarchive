@@ -7,29 +7,19 @@
     <style>
         :root { --bg: #ffffff; --text: #000000; --accent: #f4f4f4; }
         body { background: var(--bg); color: var(--text); font-family: "Courier New", Courier, monospace; margin: 40px auto; max-width: 900px; padding: 20px; line-height: 1.6; }
-        
         .header { border-bottom: 3px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
         h1 { margin: 0; text-transform: uppercase; letter-spacing: 2px; }
         .stats { font-weight: bold; margin-top: 5px; font-size: 0.9em; }
-
-        /* Search Bar */
         .search-box { margin: 20px 0; }
         #searchInput { width: 100%; padding: 12px; border: 2px solid #000; font-family: inherit; outline: none; box-sizing: border-box; }
         #searchInput:focus { background: var(--accent); }
-
-        /* Table */
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; border-bottom: 2px solid #000; padding: 10px; font-size: 0.8em; }
         td { padding: 12px 10px; border-bottom: 1px solid #ddd; font-size: 0.9em; }
-        
         tr.hidden { display: none; }
         a { color: #000; text-decoration: none; font-weight: bold; border-bottom: 1px solid transparent; }
         a:hover { border-bottom: 1px solid #000; background: #000; color: #fff; }
-
-        /* Mobile Responsive */
-        @media (max-width: 600px) {
-            th:nth-child(3), td:nth-child(3) { display: none; } /* Hide year on tiny screens */
-        }
+        @media (max-width: 600px) { th:nth-child(3), td:nth-child(3) { display: none; } }
     </style>
 </head>
 <body>
@@ -37,7 +27,6 @@
     <div class="header">
         <h1>Archive_Index</h1>
         <div class="stats">TOTAL_ITEMS: [<span id="book-count">0</span>]</div>
-        
         <div class="search-box">
             <input type="text" id="searchInput" onkeyup="filterLibrary()" placeholder="TYPE_TO_SEARCH_BY_TITLE_OR_AUTHOR...">
         </div>
@@ -52,7 +41,7 @@
             </tr>
         </thead>
         <tbody id="library-body">
-            </tbody>
+</tbody>
     </table>
 
     <script>
