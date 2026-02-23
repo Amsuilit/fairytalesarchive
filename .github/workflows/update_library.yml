@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Scan PDFs and Update HTML
+      - name: Stream Update HTML
         run: |
           python -c "
           import os, re
@@ -28,40 +28,46 @@ jobs:
               match = re.search(pattern, filename, re.IGNORECASE)
               return match.group(1).strip() if match else 'N/A'
 
-          rows = ''
+          # Pre-generate all table rows
+          new_rows_list = []
           for f in files:
               title = get_tag(f, 'Title')
               author = get_tag(f, 'Author')
               year = get_tag(f, 'Year')
               if title == 'N/A': title = f.replace('.pdf', '')
-              rows += f'<tr><td><a href=\"pdfs/{f}\" target=\"_blank\">{title}</a></td><td>{author}</td><td>{year}</td></tr>\n'
+              new_rows_list.append(f'<tr><td><a href=\"pdfs/{f}\" target=\"_blank\">{title}</a></td><td>{author}</td><td>{year}</td></tr>')
           
-          with open(html_file, 'r', encoding='utf-8') as h:
-              content = h.read()
-          
-          # NEW SELF-HEALING LOGIC
-          # This replaces everything between the markers, including the markers themselves
-          new_list_block = f'\n{rows}'
-          pattern = r'.*?'
-          
-          if not re.search(pattern, content, re.DOTALL):
-              print('CRITICAL: Markers not found! Check your index.html')
-              exit(1)
+          new_rows_html = '\n'.join(new_rows_list) + '\n'
 
-          # Update the list
-          content = re.sub(pattern, new_list_block, content, flags=re.DOTALL)
-          
-          # Update the book count
-          content = re.sub(r'id=\"book-count\">.*?</span>', f'id=\"book-count\">{len(files)}</span>', content)
-          
-          with open(html_file, 'w', encoding='utf-8') as h:
-              h.write(content)
+          # Read and Rebuild Line-by-Line
+          with open(html_file, 'r', encoding='utf-8') as f:
+              old_lines = f.readlines()
+
+          final_output = []
+          in_list_zone = False
+
+          for line in old_lines:
+              if '' in line:
+                  final_output.append(line)
+                  final_output.append(new_rows_html)
+                  in_list_zone = True
+              elif '' in line:
+                  final_output.append(line)
+                  in_list_zone = False
+              elif not in_list_zone:
+                  # Update the counter line if it exists
+                  if 'id=\"book-count\"' in line:
+                      line = re.sub(r'id=\"book-count\">.*?</span>', f'id=\"book-count\">{len(files)}</span>', line)
+                  final_output.append(line)
+
+          with open(html_file, 'w', encoding='utf-8') as f:
+              f.writelines(final_output)
           "
 
-      - name: Save and Push Changes
+      - name: Save Changes
         run: |
           git config --global user.name 'Archive-Bot'
           git config --global user.email 'bot@github.com'
           git add index.html
-          git commit -m "Automated update: Synchronized library" || exit 0
+          git commit -m "Automated update: Large-scale sync" || exit 0
           git push
