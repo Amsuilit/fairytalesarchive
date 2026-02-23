@@ -13,10 +13,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Update Database File
+      - name: Update Database File and Clean Filenames
         run: |
           python -c "
           import os, re, json
+          
           pdf_dir = 'pdfs'
           if not os.path.exists(pdf_dir): os.makedirs(pdf_dir)
           files = sorted([f for f in os.listdir(pdf_dir) if f.endswith('.pdf')])
@@ -27,24 +28,45 @@ jobs:
 
           db = []
           for f in files:
+              old_path = os.path.join(pdf_dir, f)
+              
+              # 1. Extract metadata from the original messy filename
               title = get_tag(f, 'Title')
               if title == 'N/A': title = f.replace('.pdf', '')
+              author = get_tag(f, 'Author')
+              year = get_tag(f, 'Year')
+              
+              # 2. Generate a clean filename (e.g., the-republic-375-bc.pdf)
+              clean_base = re.sub(r'[^a-zA-Z0-9]+', '-', f'{title} {year}').strip('-').lower()
+              new_filename = f'{clean_base}.pdf'
+              new_path = os.path.join(pdf_dir, new_filename)
+              
+              # 3. Rename the file safely
+              if old_path != new_path:
+                  if not os.path.exists(new_path):
+                      os.rename(old_path, new_path)
+                  else:
+                      # If a file with that clean name already exists, keep the old name to prevent overwriting
+                      new_filename = f
+              
+              # 4. Append the clean data to the database
               db.append({
                   't': title,
-                  'a': get_tag(f, 'Author'),
-                  'y': get_tag(f, 'Year'),
-                  'f': f
+                  'a': author,
+                  'y': year,
+                  'f': new_filename
               })
           
-          # This writes a JavaScript file that the HTML can read
+          # Write the database file
           with open('data.js', 'w', encoding='utf-8') as f:
               f.write('archiveData = ' + json.dumps(db) + ';')
           "
 
-      - name: Save Data
+      - name: Save Data and Renamed PDFs
         run: |
           git config --global user.name 'Archive-Bot'
           git config --global user.email 'bot@github.com'
-          git add data.js
-          git commit -m "Database updated" || exit 0
+          # We add --all to ensure Git catches the deleted old names and the added new names
+          git add --all data.js pdfs/
+          git commit -m "Database updated and PDFs renamed" || exit 0
           git push
