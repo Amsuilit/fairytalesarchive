@@ -39,26 +39,23 @@ jobs:
           with open(html_file, 'r', encoding='utf-8') as h:
               content = h.read()
           
-          # SAFETY CHECK: Define markers clearly
-          start_m = ''
-          end_m = ''
+          # NEW SELF-HEALING LOGIC
+          # This replaces everything between the markers, including the markers themselves
+          new_list_block = f'\n{rows}'
+          pattern = r'.*?'
           
-          if start_m not in content or end_m not in content:
-              print(f'CRITICAL ERROR: Markers not found in {html_file}')
-              print('Ensure your HTML contains and ')
+          if not re.search(pattern, content, re.DOTALL):
+              print('CRITICAL: Markers not found! Check your index.html')
               exit(1)
 
-          # Perform the split safely
-          parts_before = content.split(start_m)
-          parts_after = content.split(end_m)
-          
-          new_html = parts_before[0] + start_m + '\n' + rows + end_m + parts_after[-1]
+          # Update the list
+          content = re.sub(pattern, new_list_block, content, flags=re.DOTALL)
           
           # Update the book count
-          new_html = re.sub(r'id=\"book-count\">.*?</span>', f'id=\"book-count\">{len(files)}</span>', new_html)
+          content = re.sub(r'id=\"book-count\">.*?</span>', f'id=\"book-count\">{len(files)}</span>', content)
           
           with open(html_file, 'w', encoding='utf-8') as h:
-              h.write(new_html)
+              h.write(content)
           "
 
       - name: Save and Push Changes
@@ -66,5 +63,5 @@ jobs:
           git config --global user.name 'Archive-Bot'
           git config --global user.email 'bot@github.com'
           git add index.html
-          git commit -m "Automated update: Synchronized library metadata" || exit 0
+          git commit -m "Automated update: Synchronized library" || exit 0
           git push
