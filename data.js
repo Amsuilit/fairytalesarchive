@@ -1,0 +1,1 @@
+archiveData = [{"t": "The Republic", "a": "Plato, Socrates", "y": "375 BC", "f": "Author=[Plato, Socrates] Title=[The Republic] Year=[375 BC] Genre=[Philosophy].pdf"}];
