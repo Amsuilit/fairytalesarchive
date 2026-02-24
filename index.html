@@ -43,9 +43,9 @@
     <table>
         <thead>
             <tr>
-                <th class="col-title" onclick="sortBy('title')" title="Click to sort by Title">TITLE</th>
+                <th class="col-title" id="th-title" onclick="sortBy('title')" title="Click to sort by Title" tabindex="0">TITLE</th>
                 <th class="col-author">AUTHOR/AUTHOR'S</th>
-                <th class="col-year" onclick="sortBy('year')" title="Click to sort by Year">YEAR</th>
+                <th class="col-year" id="th-year" onclick="sortBy('year')" title="Click to sort by Year" tabindex="0">YEAR</th>
             </tr>
         </thead>
         <tbody id="library-body">
@@ -54,18 +54,34 @@
 
     <script>
         let archiveData = [];
-        let currentSort = 'title';
+        let currentSort = ''; // Blank string prevents the initial load from reversing the order
         let sortAscending = true;
 
         // Function to convert string years (like "375 BC" or "1838") into numbers for accurate sorting
         function parseYear(yearStr) {
             let isBC = yearStr.toUpperCase().includes('BC');
-            // Extract just the numbers
             let num = parseInt(yearStr.replace(/[^0-9]/g, ''));
-            // If there's no number (e.g. "N/A"), push it to the end
             if (isNaN(num)) return 999999;
-            // Make BC years negative so they sort before AD years
             return isBC ? -num : num;
+        }
+
+        // Function to update the visual arrows in the table headers
+        function updateHeaders() {
+            const titleHeader = document.getElementById('th-title');
+            const yearHeader = document.getElementById('th-year');
+
+            // Reset headers to default text
+            titleHeader.innerText = 'TITLE';
+            yearHeader.innerText = 'YEAR';
+
+            // Add the appropriate arrow based on the current sort state
+            const arrow = sortAscending ? ' ▲' : ' ▼';
+            
+            if (currentSort === 'title') {
+                titleHeader.innerText = 'TITLE' + arrow;
+            } else if (currentSort === 'year') {
+                yearHeader.innerText = 'YEAR' + arrow;
+            }
         }
 
         // Sorting Logic
@@ -94,7 +110,8 @@
                 }
             });
 
-            render();
+            updateHeaders(); // Update the visual arrows
+            render();        // Re-render the table
         }
 
         function render() {
