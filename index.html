@@ -138,4 +138,89 @@
                     return sortAscending ? (yearA - yearB) : (yearB - yearA);
                 } else {
                     // Title Sorting
-                    let titleA = a.t.toLowerCase
+                    let titleA = a.t.toLowerCase();
+                    let titleB = b.t.toLowerCase();
+                    if (titleA < titleB) return sortAscending ? -1 : 1;
+                    if (titleA > titleB) return sortAscending ? 1 : -1;
+                    return 0;
+                }
+            });
+
+            updateHeaders();
+            render();
+        }
+
+        function render() {
+            // 1. Grab values from all search inputs
+            const titleTerm = document.getElementById('searchTitle').value.toUpperCase();
+            const authorTerm = document.getElementById('searchAuthor').value.toUpperCase();
+            const yearFromStr = document.getElementById('yearFrom').value.trim();
+            const yearToStr = document.getElementById('yearTo').value.trim();
+            
+            // 2. Parse year ranges (If blank, default to extreme past/future)
+            const minYear = yearFromStr ? parseYear(yearFromStr) : -999999;
+            const maxYear = yearToStr ? parseYear(yearToStr) : 999999;
+
+            const tbody = document.getElementById('library-body');
+            let html = '';
+            let count = 0;
+            let currentLetter = '';
+
+            // Only show A-Z dividers if sorted by Title AND no filters are actively being typed
+            const isFiltering = titleTerm || authorTerm || yearFromStr || yearToStr;
+            const showDividers = (currentSort === 'title' && sortAscending === true && !isFiltering);
+
+            archiveData.forEach(book => {
+                const bookTitle = book.t.toUpperCase();
+                const bookAuthor = book.a.toUpperCase();
+                const bookYearNum = parseYear(book.y);
+
+                // 3. Check if the book matches ALL active filters
+                const matchTitle = bookTitle.includes(titleTerm);
+                const matchAuthor = bookAuthor.includes(authorTerm);
+                // If the book's year is N/A (999999), it only passes the year filter if no year filter is applied
+                const matchYear = (bookYearNum >= minYear && bookYearNum <= maxYear) || (!yearFromStr && !yearToStr);
+
+                if (matchTitle && matchAuthor && matchYear) {
+                    
+                    if (showDividers) {
+                        const firstChar = book.t[0].toUpperCase();
+                        if (firstChar !== currentLetter) {
+                            currentLetter = firstChar;
+                            html += `<tr><td colspan="3" class="letter-divider">${currentLetter}</td></tr>`;
+                        }
+                    }
+
+                    html += `<tr>
+                        <td><a href="pdfs/${encodeURIComponent(book.f)}" target="_blank">${book.t}</a></td>
+                        <td>${book.a}</td>
+                        <td>${book.y}</td>
+                    </tr>`;
+                    count++;
+                }
+            });
+
+            // Handle the "0 results" state
+            if (count === 0) {
+                html = `<tr><td colspan="3" style="text-align: center; padding: 30px; font-style: italic;">No matches found in the archive.</td></tr>`;
+            }
+
+            tbody.innerHTML = html;
+            document.getElementById('book-count').innerText = count;
+        }
+
+        // Load the external data.js file with Cache-Busting
+        function loadData() {
+            const script = document.createElement('script');
+            script.src = 'data.js?v=' + new Date().getTime();
+            script.onload = () => {
+                // Sort by Title A-Z as soon as the data loads
+                sortBy('title');
+            };
+            document.head.appendChild(script);
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
