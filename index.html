@@ -77,16 +77,29 @@
 
     <script>
         let archiveData = [];
-        let currentSort = ''; // Blank string prevents the initial load from reversing the order
+        let currentSort = ''; 
         let sortAscending = true;
         let searchTimeout = null;
 
-        // Function to convert string years (like "375 BC" or "1838") into numbers for accurate sorting
+        // Cache DOM elements so we only look for them once
+        const DOM = {};
+        window.addEventListener('DOMContentLoaded', () => {
+            DOM.searchTitle = document.getElementById('searchTitle');
+            DOM.searchAuthor = document.getElementById('searchAuthor');
+            DOM.yearFrom = document.getElementById('yearFrom');
+            DOM.yearTo = document.getElementById('yearTo');
+            DOM.tbody = document.getElementById('library-body');
+            DOM.countStr = document.getElementById('book-count');
+            DOM.titleHeader = document.getElementById('th-title');
+            DOM.yearHeader = document.getElementById('th-year');
+        });
+
+        // Function to convert string years (like "375 BC" or "1838") into numbers
         function parseYear(yearStr) {
-            if (!yearStr) return null;
+            if (!yearStr || yearStr === 'N/A') return 999999;
             let isBC = yearStr.toUpperCase().includes('BC');
             let num = parseInt(yearStr.replace(/[^0-9]/g, ''));
-            if (isNaN(num)) return 999999; // Fallback for purely invalid strings
+            if (isNaN(num)) return 999999; 
             return isBC ? -num : num;
         }
 
@@ -100,46 +113,42 @@
 
         // Function to update the visual arrows in the table headers
         function updateHeaders() {
-            const titleHeader = document.getElementById('th-title');
-            const yearHeader = document.getElementById('th-year');
+            // Using the cached DOM elements
+            DOM.titleHeader.innerText = 'TITLE';
+            DOM.yearHeader.innerText = 'YEAR';
 
-            // Reset headers to default text
-            titleHeader.innerText = 'TITLE';
-            yearHeader.innerText = 'YEAR';
-
-            // Add the appropriate arrow based on the current sort state
             const arrow = sortAscending ? ' ▲' : ' ▼';
             
             if (currentSort === 'title') {
-                titleHeader.innerText = 'TITLE' + arrow;
+                DOM.titleHeader.innerText = 'TITLE' + arrow;
             } else if (currentSort === 'year') {
-                yearHeader.innerText = 'YEAR' + arrow;
+                DOM.yearHeader.innerText = 'YEAR' + arrow;
             }
         }
 
-        // Sorting Logic
+        // Sorting Logic using PRE-COMPUTED values
         function sortBy(field) {
             if (currentSort === field) {
-                // If clicking the same column, reverse the direction
                 sortAscending = !sortAscending;
             } else {
-                // If clicking a new column, set it to ascending by default
                 currentSort = field;
                 sortAscending = true;
             }
 
             archiveData.sort((a, b) => {
                 if (field === 'year') {
-                    let yearA = parseYear(a.y);
-                    let yearB = parseYear(b.y);
-                    // Handle N/A or empty years by pushing them to the bottom
+                    // Use pre-computed numbers instead of parsing every time
+                    let yearA = a._yNum;
+                    let yearB = b._yNum;
+                    
                     if (yearA === 999999) return 1;
                     if (yearB === 999999) return -1;
                     return sortAscending ? (yearA - yearB) : (yearB - yearA);
                 } else {
-                    // Title Sorting
-                    let titleA = a.t.toLowerCase();
-                    let titleB = b.t.toLowerCase();
+                    // Use pre-computed uppercase strings
+                    let titleA = a._tUpper;
+                    let titleB = b._tUpper;
+                    
                     if (titleA < titleB) return sortAscending ? -1 : 1;
                     if (titleA > titleB) return sortAscending ? 1 : -1;
                     return 0;
@@ -151,75 +160,76 @@
         }
 
         function render() {
-            // 1. Grab values from all search inputs
-            const titleTerm = document.getElementById('searchTitle').value.toUpperCase();
-            const authorTerm = document.getElementById('searchAuthor').value.toUpperCase();
-            const yearFromStr = document.getElementById('yearFrom').value.trim();
-            const yearToStr = document.getElementById('yearTo').value.trim();
+            // Using cached DOM elements to grab input values
+            const titleTerm = DOM.searchTitle.value.toUpperCase();
+            const authorTerm = DOM.searchAuthor.value.toUpperCase();
+            const yearFromStr = DOM.yearFrom.value.trim();
+            const yearToStr = DOM.yearTo.value.trim();
             
-            // 2. Parse year ranges (If blank, default to extreme past/future)
             const minYear = yearFromStr ? parseYear(yearFromStr) : -999999;
             const maxYear = yearToStr ? parseYear(yearToStr) : 999999;
 
-            const tbody = document.getElementById('library-body');
-            let html = '';
+            // Using an Array to build HTML rows instead of string concatenation
+            let htmlRows = [];
             let count = 0;
             let currentLetter = '';
 
-            // Only show A-Z dividers if sorted by Title AND no filters are actively being typed
             const isFiltering = titleTerm || authorTerm || yearFromStr || yearToStr;
             const showDividers = (currentSort === 'title' && sortAscending === true && !isFiltering);
 
             archiveData.forEach(book => {
-                const bookTitle = book.t.toUpperCase();
-                const bookAuthor = book.a.toUpperCase();
-                const bookYearNum = parseYear(book.y);
-
-                // 3. Check if the book matches ALL active filters
-                const matchTitle = bookTitle.includes(titleTerm);
-                const matchAuthor = bookAuthor.includes(authorTerm);
-                // If the book's year is N/A (999999), it only passes the year filter if no year filter is applied
-                const matchYear = (bookYearNum >= minYear && bookYearNum <= maxYear) || (!yearFromStr && !yearToStr);
+                // Check against pre-computed uppercase values and numbers
+                const matchTitle = book._tUpper.includes(titleTerm);
+                const matchAuthor = book._aUpper.includes(authorTerm);
+                const matchYear = (book._yNum >= minYear && book._yNum <= maxYear) || (!yearFromStr && !yearToStr);
 
                 if (matchTitle && matchAuthor && matchYear) {
                     
                     if (showDividers) {
-                        const firstChar = book.t[0].toUpperCase();
+                        const firstChar = book._tUpper[0];
                         if (firstChar !== currentLetter) {
                             currentLetter = firstChar;
-                            html += `<tr><td colspan="3" class="letter-divider">${currentLetter}</td></tr>`;
+                            htmlRows.push(`<tr><td colspan="3" class="letter-divider">${currentLetter}</td></tr>`);
                         }
                     }
 
-                    html += `<tr>
+                    htmlRows.push(`<tr>
                         <td><a href="pdfs/${encodeURIComponent(book.f)}" target="_blank">${book.t}</a></td>
                         <td>${book.a}</td>
                         <td>${book.y}</td>
-                    </tr>`;
+                    </tr>`);
                     count++;
                 }
             });
 
-            // Handle the "0 results" state
             if (count === 0) {
-                html = `<tr><td colspan="3" style="text-align: center; padding: 30px; font-style: italic;">No matches found in the archive.</td></tr>`;
+                htmlRows.push(`<tr><td colspan="3" style="text-align: center; padding: 30px; font-style: italic;">No matches found in the archive.</td></tr>`);
             }
 
-            tbody.innerHTML = html;
-            document.getElementById('book-count').innerText = count;
+            // Join the array into a single string and dump it to the DOM
+            DOM.tbody.innerHTML = htmlRows.join('');
+            DOM.countStr.innerText = count;
         }
 
-        // Load the external data.js file with Cache-Busting
+        // Load the external data.js file
         function loadData() {
             const script = document.createElement('script');
             script.src = 'data.js?v=' + new Date().getTime();
             script.onload = () => {
+                // PRE-COMPUTE HEAVY DATA ONCE ON LOAD
+                archiveData.forEach(book => {
+                    book._tUpper = book.t.toUpperCase();
+                    book._aUpper = book.a.toUpperCase();
+                    book._yNum = parseYear(book.y);
+                });
+                
                 // Sort by Title A-Z as soon as the data loads
                 sortBy('title');
             };
             document.head.appendChild(script);
         }
 
+        // Ensure we load data only after the page (and our cached DOM variables) is ready
         window.onload = loadData;
     </script>
 </body>
