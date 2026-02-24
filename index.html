@@ -12,10 +12,15 @@
         h1 { margin: 0; text-transform: uppercase; letter-spacing: 2px; }
         .stats { font-weight: bold; margin-top: 5px; font-size: 0.9em; }
 
-        #searchInput { width: 100%; padding: 12px; border: 2px solid #000; font-family: inherit; outline: none; box-sizing: border-box; margin-top: 15px; }
+        /* Advanced Search Panel */
+        .search-panel { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        .search-panel input { padding: 10px; border: 2px solid #000; font-family: inherit; outline: none; flex: 1 1 200px; box-sizing: border-box; }
+        .year-range { display: flex; align-items: center; gap: 10px; flex: 1 1 300px; }
+        .year-range input { min-width: 80px; flex: 1; }
 
         /* Table Design */
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 20px; }
+        .table-container { width: 100%; overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; min-width: 600px; border-collapse: collapse; table-layout: fixed; }
         th { text-align: left; border-bottom: 2px solid #000; padding: 10px; font-size: 0.8em; background: #fff; position: sticky; top: 0; user-select: none; }
         td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
@@ -30,6 +35,13 @@
         .letter-divider { background: #000; color: #fff; padding: 5px 10px; font-weight: bold; }
         a { color: #000; text-decoration: none; font-weight: bold; }
         a:hover { background: #000; color: #fff; }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            .search-panel { flex-direction: column; }
+            .year-range { width: 100%; }
+            body { padding: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -37,32 +49,53 @@
     <div class="header">
         <h1>Digital Library Archive</h1>
         <div class="stats">Total Items: [<span id="book-count">0</span>]</div>
-        <input type="text" id="searchInput" onkeyup="render()" placeholder="Search by title, author, or year...">
+        
+        <div class="search-panel">
+            <input type="search" id="searchTitle" oninput="debounceSearch()" placeholder="Filter by Title..." aria-label="Search by Title">
+            <input type="search" id="searchAuthor" oninput="debounceSearch()" placeholder="Filter by Author..." aria-label="Search by Author">
+            <div class="year-range">
+                <input type="text" id="yearFrom" oninput="debounceSearch()" placeholder="Year From (e.g., 500 BC)" aria-label="Start Year">
+                <span>—</span>
+                <input type="text" id="yearTo" oninput="debounceSearch()" placeholder="Year To (e.g., 1900)" aria-label="End Year">
+            </div>
+        </div>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th class="col-title" id="th-title" onclick="sortBy('title')" title="Click to sort by Title" tabindex="0">TITLE</th>
-                <th class="col-author">AUTHOR/AUTHOR'S</th>
-                <th class="col-year" id="th-year" onclick="sortBy('year')" title="Click to sort by Year" tabindex="0">YEAR</th>
-            </tr>
-        </thead>
-        <tbody id="library-body">
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-title" id="th-title" onclick="sortBy('title')" title="Click to sort by Title" tabindex="0">TITLE</th>
+                    <th class="col-author">AUTHOR/AUTHOR'S</th>
+                    <th class="col-year" id="th-year" onclick="sortBy('year')" title="Click to sort by Year" tabindex="0">YEAR</th>
+                </tr>
+            </thead>
+            <tbody id="library-body">
+            </tbody>
+        </table>
+    </div>
 
     <script>
         let archiveData = [];
         let currentSort = ''; // Blank string prevents the initial load from reversing the order
         let sortAscending = true;
+        let searchTimeout = null;
 
         // Function to convert string years (like "375 BC" or "1838") into numbers for accurate sorting
         function parseYear(yearStr) {
+            if (!yearStr) return null;
             let isBC = yearStr.toUpperCase().includes('BC');
             let num = parseInt(yearStr.replace(/[^0-9]/g, ''));
-            if (isNaN(num)) return 999999;
+            if (isNaN(num)) return 999999; // Fallback for purely invalid strings
             return isBC ? -num : num;
+        }
+
+        // Debounce search to prevent lag when typing
+        function debounceSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                render();
+            }, 300);
         }
 
         // Function to update the visual arrows in the table headers
@@ -99,67 +132,10 @@
                 if (field === 'year') {
                     let yearA = parseYear(a.y);
                     let yearB = parseYear(b.y);
+                    // Handle N/A or empty years by pushing them to the bottom
+                    if (yearA === 999999) return 1;
+                    if (yearB === 999999) return -1;
                     return sortAscending ? (yearA - yearB) : (yearB - yearA);
                 } else {
                     // Title Sorting
-                    let titleA = a.t.toLowerCase();
-                    let titleB = b.t.toLowerCase();
-                    if (titleA < titleB) return sortAscending ? -1 : 1;
-                    if (titleA > titleB) return sortAscending ? 1 : -1;
-                    return 0;
-                }
-            });
-
-            updateHeaders(); // Update the visual arrows
-            render();        // Re-render the table
-        }
-
-        function render() {
-            const term = document.getElementById('searchInput').value.toUpperCase();
-            const tbody = document.getElementById('library-body');
-            let html = '';
-            let count = 0;
-            let currentLetter = '';
-
-            // Only show the alphabetical letter dividers if we are currently sorted by Title (A-Z)
-            const showDividers = (currentSort === 'title' && sortAscending === true);
-
-            archiveData.forEach(book => {
-                if (book.t.toUpperCase().includes(term) || book.a.toUpperCase().includes(term) || book.y.toUpperCase().includes(term)) {
-                    
-                    if (showDividers) {
-                        const firstChar = book.t[0].toUpperCase();
-                        if (firstChar !== currentLetter && term === "") {
-                            currentLetter = firstChar;
-                            html += `<tr><td colspan="3" class="letter-divider">${currentLetter}</td></tr>`;
-                        }
-                    }
-
-                    html += `<tr>
-                        <td><a href="pdfs/${encodeURIComponent(book.f)}" target="_blank">${book.t}</a></td>
-                        <td>${book.a}</td>
-                        <td>${book.y}</td>
-                    </tr>`;
-                    count++;
-                }
-            });
-
-            tbody.innerHTML = html;
-            document.getElementById('book-count').innerText = count;
-        }
-
-        // Load the external data.js file with Cache-Busting
-        function loadData() {
-            const script = document.createElement('script');
-            script.src = 'data.js?v=' + new Date().getTime();
-            script.onload = () => {
-                // Sort by Title A-Z as soon as the data loads
-                sortBy('title');
-            };
-            document.head.appendChild(script);
-        }
-
-        window.onload = loadData;
-    </script>
-</body>
-</html>
+                    let titleA = a.t.toLowerCase
