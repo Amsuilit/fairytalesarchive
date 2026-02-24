@@ -1,9 +1,0 @@
-Insert PDFs here in this folder.
-
-Examples of valid filenames:
-
-Title=[Untitled Project] Author=[John Doe] Year=[0000].pdf
-
-Author=[John Doe] Title=[Untitled Project] Year=[0000].pdf
-
-Title=[Untitled Project] Author=[John Doe] Year=[0000].pdf
