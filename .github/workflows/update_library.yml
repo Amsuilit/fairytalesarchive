@@ -19,54 +19,75 @@ jobs:
           import os, re, json
           
           pdf_dir = 'pdfs'
+          data_file = 'data.js'
           if not os.path.exists(pdf_dir): os.makedirs(pdf_dir)
           files = sorted([f for f in os.listdir(pdf_dir) if f.endswith('.pdf')])
+          
+          # 1. Load the existing database to 'remember' old metadata
+          existing_db = []
+          if os.path.exists(data_file):
+              with open(data_file, 'r', encoding='utf-8') as f:
+                  content = f.read()
+                  # Extract the JSON array from the JavaScript variable
+                  match = re.search(r'archiveData\s*=\s*(\[.*?\]);', content, re.DOTALL)
+                  if match:
+                      try:
+                          existing_db = json.loads(match.group(1))
+                      except json.JSONDecodeError:
+                          pass # Fallback to empty list if JSON is corrupted
+                          
+          # Create a quick lookup dictionary of known files
+          known_files = {book['f']: book for book in existing_db}
           
           def get_tag(f, tag):
               match = re.search(rf'{tag}=\[(.*?)\]', f, re.IGNORECASE)
               return match.group(1).strip() if match else 'N/A'
 
-          db = []
+          new_db = []
           for f in files:
               old_path = os.path.join(pdf_dir, f)
               
-              # 1. Extract metadata from the original messy filename
+              # 2. Check if we already know this file
+              if f in known_files:
+                  # If we do, keep the old metadata and skip renaming
+                  new_db.append(known_files[f])
+                  continue
+              
+              # 3. If it's a new file, extract metadata from the messy filename
               title = get_tag(f, 'Title')
               if title == 'N/A': title = f.replace('.pdf', '')
               author = get_tag(f, 'Author')
               year = get_tag(f, 'Year')
               
-              # 2. Generate a clean filename (e.g., the-republic-375-bc.pdf)
+              # 4. Generate a clean filename
               clean_base = re.sub(r'[^a-zA-Z0-9]+', '-', f'{title} {year}').strip('-').lower()
               new_filename = f'{clean_base}.pdf'
               new_path = os.path.join(pdf_dir, new_filename)
               
-              # 3. Rename the file safely
+              # 5. Rename the file safely
               if old_path != new_path:
                   if not os.path.exists(new_path):
                       os.rename(old_path, new_path)
                   else:
-                      # If a file with that clean name already exists, keep the old name to prevent overwriting
                       new_filename = f
               
-              # 4. Append the clean data to the database
-              db.append({
+              # 6. Append the brand new data to the database
+              new_db.append({
                   't': title,
                   'a': author,
                   'y': year,
                   'f': new_filename
               })
           
-          # Write the database file
-          with open('data.js', 'w', encoding='utf-8') as f:
-              f.write('archiveData = ' + json.dumps(db) + ';')
+          # Write the updated database back to the file
+          with open(data_file, 'w', encoding='utf-8') as f:
+              f.write('archiveData = ' + json.dumps(new_db) + ';')
           "
 
       - name: Save Data and Renamed PDFs
         run: |
           git config --global user.name 'Archive-Bot'
           git config --global user.email 'bot@github.com'
-          # We add --all to ensure Git catches the deleted old names and the added new names
           git add --all data.js pdfs/
           git commit -m "Database updated and PDFs renamed" || exit 0
           git push
