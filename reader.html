@@ -3,57 +3,396 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EPUB Reader</title>
+    <title>Reader</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
     <style>
-        body { margin: 0; padding: 0; background: #f4f4f4; font-family: "Courier New", Courier, monospace; display: flex; flex-direction: column; height: 100vh; }
-        .toolbar { background: #000; color: #fff; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .toolbar a, .toolbar button { color: #fff; text-decoration: none; background: none; border: 1px solid #fff; padding: 5px 15px; cursor: pointer; font-family: inherit; font-size: 1em; border-radius: 3px; }
-        .toolbar button:hover, .toolbar a:hover { background: #fff; color: #000; }
-        .controls { display: flex; gap: 10px; }
-        #viewer { flex: 1; overflow: hidden; background: #fff; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: 10px auto; width: 100%; max-width: 900px; }
+        :root {
+            --bg: #f9f5ef;
+            --text: #1a1a1a;
+            --panel: #fff;
+            --border: #000;
+            --toc-w: 280px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Courier New", Courier, monospace;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* TOOLBAR */
+        #toolbar {
+            height: 52px;
+            background: #000;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 14px;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .tb-btn {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.45);
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.82em;
+            padding: 5px 12px;
+            cursor: pointer;
+            border-radius: 3px;
+            white-space: nowrap;
+            transition: background 0.15s, color 0.15s;
+            text-decoration: none;
+        }
+        .tb-btn:hover, .tb-btn.active { background: #fff; color: #000; }
+        #title-display {
+            flex: 1;
+            text-align: center;
+            font-size: 0.83em;
+            letter-spacing: 1px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            opacity: 0.8;
+        }
+        .tb-sep { width: 1px; height: 26px; background: rgba(255,255,255,0.22); margin: 0 2px; flex-shrink: 0; }
+
+        /* PROGRESS */
+        #progress-bar-wrap { height: 3px; background: #ddd; flex-shrink: 0; }
+        #progress-bar { height: 100%; background: #000; width: 0%; transition: width 0.3s; }
+
+        /* FONT PANEL */
+        #font-panel {
+            position: absolute;
+            top: 55px;
+            right: 14px;
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            padding: 14px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 200;
+            min-width: 220px;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.12);
+        }
+        #font-panel.open { display: flex; }
+        .font-row { display: flex; align-items: center; gap: 8px; font-size: 0.82em; }
+        .font-row label { min-width: 76px; opacity: 0.65; }
+        .font-row select { flex: 1; padding: 4px; border: 1px solid #000; font-family: inherit; }
+        .font-row input[type=range] { flex: 1; accent-color: #000; }
+        .font-val { min-width: 34px; text-align: right; font-size: 0.88em; }
+
+        /* MAIN */
+        #main { flex: 1; display: flex; overflow: hidden; position: relative; }
+
+        /* TOC */
+        #toc-panel {
+            width: var(--toc-w);
+            background: var(--panel);
+            border-right: 2px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: width 0.2s, opacity 0.2s;
+        }
+        #toc-panel.hidden { width: 0; opacity: 0; pointer-events: none; }
+        #toc-header {
+            padding: 13px 16px 9px;
+            font-size: 0.72em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #eee;
+            font-weight: bold;
+        }
+        #toc-list { overflow-y: auto; flex: 1; padding: 6px 0; }
+        .toc-item {
+            display: block;
+            padding: 8px 16px;
+            font-size: 0.81em;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            color: var(--text);
+            text-decoration: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .toc-item:hover { background: #f0f0f0; }
+        .toc-item.active { border-left-color: #000; font-weight: bold; background: #f5f5f5; }
+        .toc-item.d1 { padding-left: 28px; opacity: 0.8; }
+        .toc-item.d2 { padding-left: 40px; opacity: 0.65; }
+        #toc-empty { padding: 18px 16px; font-size: 0.8em; opacity: 0.45; font-style: italic; }
+
+        /* VIEWER */
+        #viewer-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        #viewer { flex: 1; overflow: hidden; }
+
+        /* LOADING */
+        #loading-overlay {
+            position: absolute; inset: 0;
+            background: var(--bg);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 14px; z-index: 300; font-size: 0.9em;
+        }
+        #loading-overlay.gone { display: none; }
+        .spinner {
+            width: 30px; height: 30px;
+            border: 3px solid #ddd; border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* STATUS BAR */
+        #status-bar {
+            height: 28px;
+            background: #000; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            gap: 18px; font-size: 0.74em; letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+        #status-bar .lbl { opacity: 0.55; }
+
+        /* NIGHT MODE */
+        body.night { --bg: #1a1a1a; --text: #d4cdbf; --panel: #222; --border: #444; }
+        body.night #toolbar { background: #111; }
+        body.night #progress-bar-wrap { background: #333; }
+        body.night #progress-bar { background: #777; }
+        body.night #status-bar { background: #111; }
+        body.night .toc-item:hover { background: #2c2c2c; }
+        body.night .toc-item.active { background: #2c2c2c; border-left-color: #aaa; }
+        body.night .font-row select { background: #333; color: #d4cdbf; border-color: #555; }
+
+        @media (max-width: 600px) {
+            #toc-panel { position: absolute; z-index: 150; height: 100%; }
+            #title-display { display: none; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="toolbar">
-        <a href="index.html">← Back to Library</a>
-        <div class="controls">
-            <a id="download-btn" href="#" download>↓ Download EPUB</a>
-            <button id="prev" onclick="rendition.prev()">Prev</button>
-            <button id="next" onclick="rendition.next()">Next</button>
-        </div>
+<div id="toolbar">
+    <a href="index.html" class="tb-btn">← Library</a>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" id="btn-toc" onclick="toggleTOC()">☰ Contents</button>
+    <span id="title-display">Loading…</span>
+    <button class="tb-btn" id="btn-font" onclick="toggleFontPanel()">Aa</button>
+    <button class="tb-btn" id="btn-theme" onclick="toggleTheme()">◑ Night</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" onclick="go(-1)">‹ Prev</button>
+    <button class="tb-btn" onclick="go(1)">Next ›</button>
+</div>
+
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+<div id="font-panel">
+    <div class="font-row">
+        <label>Font</label>
+        <select id="sel-font" onchange="applyFont()">
+            <option value="Georgia, serif">Georgia</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+            <option value="'Palatino Linotype', serif">Palatino</option>
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="'Courier New', monospace">Courier</option>
+        </select>
     </div>
+    <div class="font-row">
+        <label>Size</label>
+        <input type="range" id="sel-size" min="10" max="28" value="16" oninput="applyFont()">
+        <span class="font-val" id="val-size">16px</span>
+    </div>
+    <div class="font-row">
+        <label>Line Height</label>
+        <input type="range" id="sel-lh" min="12" max="30" value="17" oninput="applyFont()">
+        <span class="font-val" id="val-lh">1.7</span>
+    </div>
+</div>
 
-    <div id="viewer"></div>
+<div id="main">
+    <div id="toc-panel">
+        <div id="toc-header">Table of Contents</div>
+        <div id="toc-list"><div id="toc-empty">Loading…</div></div>
+    </div>
+    <div id="viewer-wrap">
+        <div id="loading-overlay">
+            <div class="spinner"></div>
+            <span>Loading book…</span>
+        </div>
+        <div id="viewer"></div>
+    </div>
+</div>
 
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const fileUrl = urlParams.get('file');
+<div id="status-bar">
+    <span><span class="lbl">Chapter </span><strong id="st-ch">—</strong></span>
+    <span><span class="lbl">Section </span><strong id="st-pg">—</strong></span>
+    <span><span class="lbl">Progress </span><strong id="st-pct">—</strong></span>
+</div>
 
-        let rendition;
+<script>
+(function () {
+    const params  = new URLSearchParams(window.location.search);
+    const fileUrl = params.get('file');
+    if (!fileUrl) {
+        document.getElementById('loading-overlay').innerHTML =
+            '<p style="color:#c00;padding:20px">Error: No book URL provided.</p>';
+        return;
+    }
 
-        if (fileUrl) {
-            // Set the download button link to the current file
-            document.getElementById('download-btn').href = fileUrl;
+    let book, rendition, tocEls = [], nightMode = false, tocOpen = true, fpOpen = false;
 
-            const book = ePub(fileUrl);
-            rendition = book.renderTo("viewer", {
-                width: "100%",
-                height: "100%",
-                spread: "none"
-            });
+    book = ePub(fileUrl);
+    rendition = book.renderTo('viewer', { width: '100%', height: '100%', spread: 'none', flow: 'paginated' });
+    rendition.display().catch(err => {
+        document.getElementById('loading-overlay').innerHTML =
+            `<p style="color:#c00;padding:20px">Failed to load EPUB.<br><small>${err}</small></p>`;
+    });
 
-            rendition.display();
+    // ── Ready ──────────────────────────────────────────────────────────────
+    book.ready.then(() => {
+        document.getElementById('loading-overlay').classList.add('gone');
 
-            document.addEventListener("keyup", function(e) {
-                if (e.key === "ArrowLeft") rendition.prev();
-                if (e.key === "ArrowRight") rendition.next();
-            }, false);
-        } else {
-            document.getElementById('viewer').innerHTML = "<p>Error: No book specified.</p>";
+        // Title
+        let title = 'Untitled';
+        try {
+            const m = book.packaging.metadata;
+            if (m && m.title) title = m.title;
+        } catch(_) {}
+        if (title === 'Untitled') {
+            title = decodeURIComponent(fileUrl.split('/').pop().replace('.epub',''))
+                        .replace(/-/g,' ').replace(/\b\w/g, c => c.toUpperCase());
         }
-    </script>
+        document.getElementById('title-display').textContent = title;
+        document.title = title + ' — Reader';
+
+        // TOC
+        loadTOC();
+        applyFont();
+    }).catch(() => {
+        document.getElementById('loading-overlay').innerHTML =
+            '<p style="color:#c00;padding:20px">Failed to parse EPUB.</p>';
+    });
+
+    // ── TOC ────────────────────────────────────────────────────────────────
+    function loadTOC() {
+        const toc = book.navigation && book.navigation.toc;
+        if (!toc) { document.getElementById('toc-empty').textContent = 'No contents available.'; return; }
+        const render = (items) => {
+            if (!items || !items.length) { document.getElementById('toc-empty').textContent = 'No contents available.'; return; }
+            try { document.getElementById('toc-empty').remove(); } catch(_) {}
+            const list = document.getElementById('toc-list');
+            function addItems(arr, depth) {
+                arr.forEach(item => {
+                    const a = document.createElement('a');
+                    a.className = 'toc-item' + (depth === 1 ? ' d1' : depth >= 2 ? ' d2' : '');
+                    a.textContent = item.label.trim();
+                    a.title = item.label.trim();
+                    a.href = '#';
+                    a.onclick = e => {
+                        e.preventDefault();
+                        rendition.display(item.href);
+                        activateTOC(a);
+                        if (window.innerWidth < 600) toggleTOC();
+                    };
+                    list.appendChild(a);
+                    tocEls.push({ el: a, href: item.href });
+                    if (item.subitems && item.subitems.length) addItems(item.subitems, depth + 1);
+                });
+            }
+            addItems(items, 0);
+        };
+        // epub.js sometimes returns a promise, sometimes an array
+        if (typeof toc.then === 'function') toc.then(render); else render(toc);
+    }
+
+    function activateTOC(active) {
+        tocEls.forEach(t => t.el.classList.remove('active'));
+        if (active) active.classList.add('active');
+    }
+
+    // ── Location / Progress ────────────────────────────────────────────────
+    let totalSections = 0;
+    book.ready.then(() => { totalSections = book.spine.items.length; });
+
+    rendition.on('relocated', loc => {
+        if (!loc) return;
+        const pct = Math.round((loc.start.percentage || 0) * 100);
+        document.getElementById('progress-bar').style.width = pct + '%';
+        document.getElementById('st-pct').textContent = pct + '%';
+
+        const idx = loc.start.index !== undefined ? loc.start.index + 1 : '—';
+        document.getElementById('st-pg').textContent = `${idx} / ${totalSections || '?'}`;
+
+        // Try to find matching TOC entry
+        const href = loc.start.href || '';
+        const match = tocEls.find(t => href && (href.includes(t.href) || t.href.includes(href.split('#')[0])));
+        if (match) {
+            activateTOC(match.el);
+            document.getElementById('st-ch').textContent = match.el.textContent.trim().substring(0, 30);
+        }
+    });
+
+    // ── Navigation ─────────────────────────────────────────────────────────
+    window.go = dir => dir < 0 ? rendition.prev() : rendition.next();
+    document.addEventListener('keyup', e => {
+        if (e.key === 'ArrowLeft')  rendition.prev();
+        if (e.key === 'ArrowRight') rendition.next();
+    });
+
+    // ── Font ───────────────────────────────────────────────────────────────
+    window.applyFont = function () {
+        const family = document.getElementById('sel-font').value;
+        const size   = +document.getElementById('sel-size').value;
+        const lhRaw  = +document.getElementById('sel-lh').value;
+        const lh     = (lhRaw / 10).toFixed(1);
+        document.getElementById('val-size').textContent = size + 'px';
+        document.getElementById('val-lh').textContent   = lh;
+
+        rendition.themes.override('font-family', family);
+        rendition.themes.override('font-size', size + 'px');
+        rendition.themes.override('line-height', lh);
+        rendition.themes.override('color', nightMode ? '#d4cdbf' : '#1a1a1a');
+        rendition.themes.override('background', nightMode ? '#1a1a1a' : '#f9f5ef');
+    };
+
+    window.toggleFontPanel = function () {
+        fpOpen = !fpOpen;
+        document.getElementById('font-panel').classList.toggle('open', fpOpen);
+        document.getElementById('btn-font').classList.toggle('active', fpOpen);
+    };
+    document.addEventListener('click', e => {
+        if (fpOpen && !document.getElementById('font-panel').contains(e.target)
+                   && e.target.id !== 'btn-font') {
+            fpOpen = false;
+            document.getElementById('font-panel').classList.remove('open');
+            document.getElementById('btn-font').classList.remove('active');
+        }
+    });
+
+    // ── TOC toggle ─────────────────────────────────────────────────────────
+    window.toggleTOC = function () {
+        tocOpen = !tocOpen;
+        document.getElementById('toc-panel').classList.toggle('hidden', !tocOpen);
+        document.getElementById('btn-toc').classList.toggle('active', tocOpen);
+    };
+
+    // ── Night mode ─────────────────────────────────────────────────────────
+    window.toggleTheme = function () {
+        nightMode = !nightMode;
+        document.body.classList.toggle('night', nightMode);
+        document.getElementById('btn-theme').textContent = nightMode ? '◑ Day' : '◑ Night';
+        applyFont();
+    };
+})();
+</script>
 </body>
 </html>
