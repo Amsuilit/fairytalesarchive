@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPUB Reader</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; background: #f4f4f4; font-family: "Courier New", Courier, monospace; display: flex; flex-direction: column; height: 100vh; }
+        .toolbar { background: #000; color: #fff; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .toolbar a, .toolbar button { color: #fff; text-decoration: none; background: none; border: 1px solid #fff; padding: 5px 15px; cursor: pointer; font-family: inherit; font-size: 1em; }
+        .toolbar button:hover, .toolbar a:hover { background: #fff; color: #000; }
+        #viewer { flex: 1; overflow: hidden; background: #fff; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: 10px auto; width: 100%; max-width: 900px; }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <a href="index.html">← Back to Library</a>
+        <div>
+            <button id="prev" onclick="rendition.prev()">Prev</button>
+            <button id="next" onclick="rendition.next()">Next</button>
+        </div>
+    </div>
+
+    <div id="viewer"></div>
+
+    <script>
+        // 1. Get the file name from the URL (e.g., reader.html?file=pdfs/book.epub)
+        const urlParams = new URLSearchParams(window.location.search);
+        const fileUrl = urlParams.get('file');
+
+        let rendition;
+
+        if (fileUrl) {
+            // 2. Initialize the ePub library with the file
+            const book = ePub(fileUrl);
+
+            // 3. Render it inside the "viewer" div
+            rendition = book.renderTo("viewer", {
+                width: "100%",
+                height: "100%",
+                spread: "none" // Single page view (better for mobile)
+            });
+
+            rendition.display();
+
+            // 4. Allow keyboard arrow keys to turn pages
+            document.addEventListener("keyup", function(e) {
+                if (e.key === "ArrowLeft") rendition.prev();
+                if (e.key === "ArrowRight") rendition.next();
+            }, false);
+        } else {
+            document.getElementById('viewer').innerHTML = "<p>Error: No book specified.</p>";
+        }
+    </script>
+</body>
+</html>
