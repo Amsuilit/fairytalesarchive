@@ -28,8 +28,10 @@
 
         .col-title:hover, .col-year:hover { background: #f0f0f0; }
         .letter-divider { background: #000; color: #fff; padding: 5px 10px; font-weight: bold; }
+        a { color: #000; text-decoration: none; font-weight: bold; }
+        a:hover { background: #000; color: #fff; }
 
-        /* NEW: Styling for the Format Links next to the title */
+        /* Styling for the Format Links next to the title */
         .format-links { display: inline-flex; gap: 5px; margin-left: 10px; vertical-align: middle; }
         .format-links a { font-size: 0.75em; padding: 2px 6px; border: 1px solid #000; border-radius: 3px; font-weight: normal; color: #000; text-decoration: none; }
         .format-links a:hover { background: #000; color: #fff; }
@@ -161,18 +163,39 @@
                         }
                     }
 
-                    // NEW: Generate the format buttons based on the database
-                    let linksHtml = '<span class="format-links">';
-                    if (book.epub) {
-                        linksHtml += `<a href="reader.html?file=${encodeURIComponent('books/' + book.base + '.epub')}">EPUB</a>`;
+                    // Define the main title link (PDF or EPUB)
+                    let defaultLink = `books/${encodeURIComponent(book.f)}`;
+                    let targetAttr = `target="_blank"`;
+                    
+                    if (book.f && book.f.toLowerCase().endsWith('.epub')) {
+                        defaultLink = `reader.html?file=${encodeURIComponent('books/' + book.f)}`;
+                        targetAttr = ``; // Open EPUBs in the same tab
                     }
-                    if (book.pdf) {
-                        linksHtml += `<a href="books/${encodeURIComponent(book.base + '.pdf')}" target="_blank">PDF</a>`;
+
+                    // Build format buttons safely
+                    let linksHtml = '<span class="format-links">';
+                    
+                    if (book.base !== undefined) {
+                        // Use new data format if it exists
+                        if (book.epub) {
+                            linksHtml += `<a href="reader.html?file=${encodeURIComponent('books/' + book.base + '.epub')}">EPUB</a>`;
+                        }
+                        if (book.pdf) {
+                            linksHtml += `<a href="books/${encodeURIComponent(book.base + '.pdf')}" target="_blank">PDF</a>`;
+                        }
+                    } else {
+                        // Fallback: If GitHub action hasn't run yet, use the old f tag
+                        if (book.f && book.f.toLowerCase().endsWith('.epub')) {
+                            linksHtml += `<a href="${defaultLink}">EPUB</a>`;
+                        } else {
+                            linksHtml += `<a href="${defaultLink}" target="_blank">PDF</a>`;
+                        }
                     }
                     linksHtml += '</span>';
 
+                    // Re-added the <a href> around ${book.t} so the title is clickable!
                     htmlRows.push(`<tr>
-                        <td>${book.t} ${linksHtml}</td>
+                        <td><a href="${defaultLink}" ${targetAttr}>${book.t}</a> ${linksHtml}</td>
                         <td>${book.a}</td>
                         <td>${book.y}</td>
                     </tr>`);
