@@ -2,129 +2,145 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>Reader</title>
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
     <style>
         :root {
-            --bg: #f9f5ef;
-            --text: #1a1a1a;
-            --panel: #fff;
-            --border: #000;
+            --bg: #f9f5ef; --text: #1a1a1a;
+            --panel: #fff; --border: #000;
+            --toolbar: #000; --toolbar-fg: #fff;
             --toc-w: 280px;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: "Courier New", Courier, monospace;
-            background: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            background: var(--bg); color: var(--text);
+            height: 100dvh; display: flex; flex-direction: column;
+            overflow: hidden; user-select: none; -webkit-user-select: none;
         }
 
         /* TOOLBAR */
         #toolbar {
-            height: 52px;
-            background: #000;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 14px;
-            flex-shrink: 0;
-            z-index: 100;
+            height: 52px; background: var(--toolbar); color: var(--toolbar-fg);
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 12px; flex-shrink: 0; z-index: 100;
+            padding-top: env(safe-area-inset-top);
         }
-        .tb-btn {
-            background: none;
-            border: 1px solid rgba(255,255,255,0.45);
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.82em;
-            padding: 5px 12px;
-            cursor: pointer;
-            border-radius: 3px;
-            white-space: nowrap;
-            transition: background 0.15s, color 0.15s;
-            text-decoration: none;
+        .btn {
+            background: none; border: 1px solid rgba(255,255,255,0.4); color: #fff;
+            font-family: inherit; font-size: 0.78em; padding: 5px 10px;
+            cursor: pointer; border-radius: 3px; white-space: nowrap;
+            transition: background .15s, color .15s; text-decoration: none; flex-shrink: 0;
         }
-        .tb-btn:hover, .tb-btn.active { background: #fff; color: #000; }
+        .btn:hover, .btn.on { background: #fff; color: #000; }
         #title-display {
-            flex: 1;
-            text-align: center;
-            font-size: 0.83em;
-            letter-spacing: 1px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            opacity: 0.8;
+            flex: 1; text-align: center; font-size: 0.8em; letter-spacing: 1px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.75; padding: 0 4px;
         }
-        .tb-sep { width: 1px; height: 26px; background: rgba(255,255,255,0.22); margin: 0 2px; flex-shrink: 0; }
+        .sep { width: 1px; height: 24px; background: rgba(255,255,255,.2); flex-shrink: 0; }
 
         /* PROGRESS */
-        #progress-bar-wrap { height: 3px; background: #ddd; flex-shrink: 0; }
-        #progress-bar { height: 100%; background: #000; width: 0%; transition: width 0.3s; }
+        #prog-wrap { height: 3px; background: #333; flex-shrink: 0; }
+        #prog-bar  { height: 100%; background: #fff; width: 0%; transition: width .4s; }
+
+        /* SEARCH BAR */
+        #search-bar {
+            display: none; align-items: center; gap: 8px;
+            padding: 8px 14px; background: #111; border-bottom: 1px solid #333; flex-shrink: 0;
+        }
+        #search-bar.open { display: flex; }
+        #search-input {
+            flex: 1; background: #222; border: 1px solid #555; color: #fff;
+            font-family: inherit; font-size: 0.85em; padding: 6px 10px; border-radius: 3px; outline: none;
+        }
+        #search-input::placeholder { color: #666; }
+        #search-results { font-size: 0.75em; color: #aaa; white-space: nowrap; }
+        #search-nav { display: flex; gap: 4px; }
+        #search-nav .btn { font-size: 0.75em; padding: 4px 8px; }
+
+        /* OVERLAY */
+        .overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,.45); z-index: 140; display: none;
+        }
+        .overlay.open { display: block; }
 
         /* FONT PANEL */
         #font-panel {
-            position: absolute;
-            top: 55px;
-            right: 14px;
-            background: var(--panel);
-            border: 2px solid var(--border);
-            border-radius: 4px;
-            padding: 14px;
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 200;
-            min-width: 220px;
-            box-shadow: 4px 4px 0 rgba(0,0,0,0.12);
+            position: absolute; top: 0; right: 0; width: 240px; height: 100%;
+            background: var(--panel); border-left: 2px solid var(--border);
+            display: flex; flex-direction: column; z-index: 200;
+            transform: translateX(100%); transition: transform .2s; overflow-y: auto;
         }
-        #font-panel.open { display: flex; }
-        .font-row { display: flex; align-items: center; gap: 8px; font-size: 0.82em; }
-        .font-row label { min-width: 76px; opacity: 0.65; }
-        .font-row select { flex: 1; padding: 4px; border: 1px solid #000; font-family: inherit; }
-        .font-row input[type=range] { flex: 1; accent-color: #000; }
-        .font-val { min-width: 34px; text-align: right; font-size: 0.88em; }
+        #font-panel.open { transform: translateX(0); }
+        .fp-section { padding: 14px 16px; border-bottom: 1px solid #eee; }
+        .fp-label { font-size: 0.68em; letter-spacing: 2px; text-transform: uppercase; opacity: 0.55; margin-bottom: 10px; }
+        .fp-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .fp-row:last-child { margin-bottom: 0; }
+        .fp-row label { font-size: 0.78em; min-width: 68px; opacity: 0.7; }
+        .fp-row select { flex: 1; padding: 5px; border: 1px solid #ccc; font-family: inherit; font-size: 0.82em; border-radius: 2px; }
+        .fp-row input[type=range] { flex: 1; accent-color: #000; }
+        .fp-val { min-width: 32px; text-align: right; font-size: 0.8em; }
+        .theme-btns { display: flex; gap: 8px; }
+        .theme-btn {
+            flex: 1; padding: 8px; border: 2px solid #ccc; border-radius: 4px;
+            cursor: pointer; font-size: 0.75em; text-align: center; transition: border-color .15s;
+        }
+        .theme-btn.active { border-color: #000; font-weight: bold; }
+        .theme-btn.t-day   { background: #f9f5ef; color: #1a1a1a; }
+        .theme-btn.t-sepia { background: #f4ecd8; color: #3b2f1e; }
+        .theme-btn.t-night { background: #1a1a1a; color: #d4cdbf; }
+
+        /* BOOKMARKS PANEL */
+        #bm-panel {
+            position: absolute; top: 0; right: 0; width: 300px; height: 100%;
+            background: var(--panel); border-left: 2px solid var(--border);
+            display: flex; flex-direction: column; z-index: 200;
+            transform: translateX(100%); transition: transform .2s;
+        }
+        #bm-panel.open { transform: translateX(0); }
+        #bm-header {
+            padding: 14px 16px; font-size: 0.72em; letter-spacing: 2px;
+            text-transform: uppercase; border-bottom: 1px solid #eee; font-weight: bold;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        #bm-list { overflow-y: auto; flex: 1; }
+        .bm-item {
+            padding: 12px 16px; border-bottom: 1px solid #f0f0f0; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+        }
+        .bm-item:hover { background: #f8f8f8; }
+        .bm-text { font-size: 0.8em; flex: 1; }
+        .bm-chapter { font-size: 0.72em; opacity: 0.5; margin-top: 3px; }
+        .bm-del { background: none; border: none; cursor: pointer; opacity: 0.3; font-size: 1em; padding: 0 4px; }
+        .bm-del:hover { opacity: 0.9; color: #c00; }
+        #bm-empty { padding: 24px 16px; font-size: 0.82em; opacity: 0.4; font-style: italic; }
 
         /* MAIN */
         #main { flex: 1; display: flex; overflow: hidden; position: relative; }
 
         /* TOC */
         #toc-panel {
-            width: var(--toc-w);
-            background: var(--panel);
-            border-right: 2px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            flex-shrink: 0;
-            transition: width 0.2s, opacity 0.2s;
+            width: var(--toc-w); background: var(--panel); border-right: 2px solid var(--border);
+            display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
+            transition: width .2s, opacity .2s;
         }
         #toc-panel.hidden { width: 0; opacity: 0; pointer-events: none; }
         #toc-header {
-            padding: 13px 16px 9px;
-            font-size: 0.72em;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border-bottom: 1px solid #eee;
-            font-weight: bold;
+            padding: 13px 16px 10px; font-size: 0.72em; letter-spacing: 2px;
+            text-transform: uppercase; border-bottom: 1px solid #eee; font-weight: bold;
         }
         #toc-list { overflow-y: auto; flex: 1; padding: 6px 0; }
         .toc-item {
-            display: block;
-            padding: 8px 16px;
-            font-size: 0.81em;
-            cursor: pointer;
-            border-left: 3px solid transparent;
-            color: var(--text);
-            text-decoration: none;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            display: block; padding: 8px 16px; font-size: 0.81em; cursor: pointer;
+            border-left: 3px solid transparent; color: var(--text); text-decoration: none;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .toc-item:hover { background: #f0f0f0; }
         .toc-item.active { border-left-color: #000; font-weight: bold; background: #f5f5f5; }
@@ -137,261 +153,478 @@
         #viewer { flex: 1; overflow: hidden; }
 
         /* LOADING */
-        #loading-overlay {
-            position: absolute; inset: 0;
-            background: var(--bg);
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            gap: 14px; z-index: 300; font-size: 0.9em;
+        #loading {
+            position: absolute; inset: 0; background: var(--bg);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 14px; z-index: 300; font-size: 0.88em;
         }
-        #loading-overlay.gone { display: none; }
+        #loading.gone { display: none; }
         .spinner {
-            width: 30px; height: 30px;
-            border: 3px solid #ddd; border-top-color: #000;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
+            width: 30px; height: 30px; border: 3px solid #ccc; border-top-color: #000;
+            border-radius: 50%; animation: spin .7s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* STATUS BAR */
-        #status-bar {
-            height: 28px;
-            background: #000; color: #fff;
-            display: flex; align-items: center; justify-content: center;
-            gap: 18px; font-size: 0.74em; letter-spacing: 0.5px;
-            flex-shrink: 0;
+        #status {
+            height: 28px; background: #000; color: #fff;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 14px; font-size: 0.72em; letter-spacing: 0.4px;
+            flex-shrink: 0; gap: 8px; padding-bottom: env(safe-area-inset-bottom);
         }
-        #status-bar .lbl { opacity: 0.55; }
+        #status .s { opacity: 0.5; }
+        #status .grp { display: flex; gap: 12px; align-items: center; }
 
-        /* NIGHT MODE */
-        body.night { --bg: #1a1a1a; --text: #d4cdbf; --panel: #222; --border: #444; }
-        body.night #toolbar { background: #111; }
-        body.night #progress-bar-wrap { background: #333; }
-        body.night #progress-bar { background: #777; }
-        body.night #status-bar { background: #111; }
-        body.night .toc-item:hover { background: #2c2c2c; }
-        body.night .toc-item.active { background: #2c2c2c; border-left-color: #aaa; }
-        body.night .font-row select { background: #333; color: #d4cdbf; border-color: #555; }
+        /* RESUME TOAST */
+        #resume-toast {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            background: #000; color: #fff; border-radius: 4px; padding: 10px 18px;
+            font-size: 0.82em; display: flex; gap: 12px; align-items: center;
+            z-index: 250; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap;
+        }
+        #resume-toast.show { opacity: 1; pointer-events: all; }
+        #resume-toast button {
+            background: none; border: 1px solid rgba(255,255,255,.5); color: #fff;
+            font-family: inherit; font-size: 0.9em; padding: 3px 10px; cursor: pointer; border-radius: 3px;
+        }
+        #resume-toast button:hover { background: #fff; color: #000; }
 
-        @media (max-width: 600px) {
+        /* THEMES */
+        body.sepia { --bg: #f4ecd8; --text: #3b2f1e; --panel: #fdf5e6; --border: #8b7355; }
+        body.night { --bg: #1a1a1a; --text: #d4cdbf; --panel: #222; --border: #444; --toolbar: #111; }
+        body.night #prog-wrap { background: #333; }
+        body.night #prog-bar  { background: #888; }
+        body.night #status    { background: #111; }
+        body.night #search-bar { background: #0d0d0d; border-color: #222; }
+        body.night .toc-item:hover  { background: #2a2a2a; }
+        body.night .toc-item.active { background: #2a2a2a; border-left-color: #aaa; }
+        body.night .bm-item:hover   { background: #2a2a2a; }
+        body.night .fp-row select   { background: #333; color: #d4cdbf; border-color: #555; }
+        body.night .theme-btn.t-night { border-color: #fff; }
+        body.sepia .toc-item:hover  { background: #ede3cc; }
+        body.sepia .toc-item.active { background: #ede3cc; border-left-color: #8b7355; }
+        body.sepia #status   { background: #3b2f1e; }
+        body.sepia #toolbar  { background: #3b2f1e; }
+        body.sepia #prog-wrap { background: #c4a97a; }
+        body.sepia #prog-bar  { background: #3b2f1e; }
+        body.sepia .theme-btn.t-sepia { border-color: #3b2f1e; }
+
+        /* Fullscreen: hide chrome */
+        :fullscreen #toolbar,
+        :fullscreen #prog-wrap,
+        :fullscreen #status,
+        :fullscreen #search-bar { display: none !important; }
+        :-webkit-full-screen #toolbar,
+        :-webkit-full-screen #status { display: none !important; }
+
+        @media (max-width: 640px) {
             #toc-panel { position: absolute; z-index: 150; height: 100%; }
             #title-display { display: none; }
+            .hide-sm { display: none !important; }
         }
     </style>
 </head>
 <body>
 
 <div id="toolbar">
-    <a href="index.html" class="tb-btn">← Library</a>
-    <div class="tb-sep"></div>
-    <button class="tb-btn" id="btn-toc" onclick="toggleTOC()">☰ Contents</button>
+    <a href="index.html" class="btn">← Back</a>
+    <div class="sep"></div>
+    <button class="btn" id="btn-toc" onclick="toggleTOC()">☰</button>
     <span id="title-display">Loading…</span>
-    <button class="tb-btn" id="btn-font" onclick="toggleFontPanel()">Aa</button>
-    <button class="tb-btn" id="btn-theme" onclick="toggleTheme()">◑ Night</button>
-    <div class="tb-sep"></div>
-    <button class="tb-btn" onclick="go(-1)">‹ Prev</button>
-    <button class="tb-btn" onclick="go(1)">Next ›</button>
+    <button class="btn hide-sm" id="btn-search" onclick="toggleSearch()">⌕ Search</button>
+    <button class="btn" id="btn-bm-add" onclick="addBookmark()" title="Bookmark this position">🔖</button>
+    <button class="btn" id="btn-bm" onclick="toggleBM()">Bookmarks</button>
+    <button class="btn" id="btn-font" onclick="toggleFont()">Aa</button>
+    <button class="btn" id="btn-fs" onclick="toggleFS()">⛶</button>
+    <div class="sep"></div>
+    <button class="btn" onclick="go(-1)">‹</button>
+    <button class="btn" onclick="go(1)">›</button>
 </div>
 
-<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+<div id="prog-wrap"><div id="prog-bar"></div></div>
+
+<div id="search-bar">
+    <input id="search-input" type="search" placeholder="Search in book…" oninput="onSearch()">
+    <span id="search-results"></span>
+    <div id="search-nav">
+        <button class="btn" onclick="searchStep(-1)">↑</button>
+        <button class="btn" onclick="searchStep(1)">↓</button>
+        <button class="btn" onclick="toggleSearch()">✕</button>
+    </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeAllPanels()"></div>
 
 <div id="font-panel">
-    <div class="font-row">
-        <label>Font</label>
-        <select id="sel-font" onchange="applyFont()">
-            <option value="Georgia, serif">Georgia</option>
-            <option value="'Times New Roman', serif">Times New Roman</option>
-            <option value="'Palatino Linotype', serif">Palatino</option>
-            <option value="Arial, sans-serif">Arial</option>
-            <option value="'Courier New', monospace">Courier</option>
-        </select>
+    <div class="fp-section">
+        <div class="fp-label">Theme</div>
+        <div class="theme-btns">
+            <div class="theme-btn t-day active" onclick="setTheme('day')">Day</div>
+            <div class="theme-btn t-sepia" onclick="setTheme('sepia')">Sepia</div>
+            <div class="theme-btn t-night" onclick="setTheme('night')">Night</div>
+        </div>
     </div>
-    <div class="font-row">
-        <label>Size</label>
-        <input type="range" id="sel-size" min="10" max="28" value="16" oninput="applyFont()">
-        <span class="font-val" id="val-size">16px</span>
+    <div class="fp-section">
+        <div class="fp-label">Typography</div>
+        <div class="fp-row">
+            <label>Font</label>
+            <select id="sel-font" onchange="applyFont()">
+                <option value="Georgia, serif">Georgia</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+                <option value="'Palatino Linotype', serif">Palatino</option>
+                <option value="Arial, sans-serif">Arial</option>
+                <option value="'Courier New', monospace">Courier</option>
+            </select>
+        </div>
+        <div class="fp-row">
+            <label>Size</label>
+            <input type="range" id="sel-size" min="10" max="28" value="16" oninput="applyFont()">
+            <span class="fp-val" id="val-size">16px</span>
+        </div>
+        <div class="fp-row">
+            <label>Line Height</label>
+            <input type="range" id="sel-lh" min="12" max="30" value="17" oninput="applyFont()">
+            <span class="fp-val" id="val-lh">1.7</span>
+        </div>
     </div>
-    <div class="font-row">
-        <label>Line Height</label>
-        <input type="range" id="sel-lh" min="12" max="30" value="17" oninput="applyFont()">
-        <span class="font-val" id="val-lh">1.7</span>
+</div>
+
+<div id="bm-panel">
+    <div id="bm-header">
+        <span>Bookmarks</span>
+        <button class="btn" onclick="toggleBM()">✕</button>
+    </div>
+    <div id="bm-list">
+        <div id="bm-empty">No bookmarks yet. Press 🔖 to save your position.</div>
     </div>
 </div>
 
 <div id="main">
     <div id="toc-panel">
-        <div id="toc-header">Table of Contents</div>
+        <div id="toc-header">Contents</div>
         <div id="toc-list"><div id="toc-empty">Loading…</div></div>
     </div>
     <div id="viewer-wrap">
-        <div id="loading-overlay">
-            <div class="spinner"></div>
-            <span>Loading book…</span>
-        </div>
+        <div id="loading"><div class="spinner"></div><span>Loading book…</span></div>
         <div id="viewer"></div>
     </div>
 </div>
 
-<div id="status-bar">
-    <span><span class="lbl">Chapter </span><strong id="st-ch">—</strong></span>
-    <span><span class="lbl">Section </span><strong id="st-pg">—</strong></span>
-    <span><span class="lbl">Progress </span><strong id="st-pct">—</strong></span>
+<div id="status">
+    <div class="grp">
+        <span><span class="s">Chapter </span><strong id="st-ch">—</strong></span>
+        <span class="hide-sm"><span class="s">Section </span><strong id="st-sec">—</strong></span>
+    </div>
+    <div class="grp">
+        <strong id="st-pct">0%</strong>
+        <span class="s">·</span>
+        <strong id="st-time">— min left</strong>
+    </div>
+</div>
+
+<div id="resume-toast">
+    <span>Resume where you left off?</span>
+    <button onclick="resumeReading()">Resume</button>
+    <button onclick="dismissToast()">✕</button>
 </div>
 
 <script>
 (function () {
-    const params  = new URLSearchParams(window.location.search);
-    const fileUrl = params.get('file');
-    if (!fileUrl) {
-        document.getElementById('loading-overlay').innerHTML =
-            '<p style="color:#c00;padding:20px">Error: No book URL provided.</p>';
-        return;
-    }
+'use strict';
 
-    let book, rendition, tocEls = [], nightMode = false, tocOpen = true, fpOpen = false;
+const params  = new URLSearchParams(window.location.search);
+const fileUrl = params.get('file');
+const bookKey = 'book_' + (fileUrl || '').replace(/[^a-z0-9]/gi, '_');
 
-    book = ePub(fileUrl);
-    rendition = book.renderTo('viewer', { width: '100%', height: '100%', spread: 'none', flow: 'paginated' });
-    rendition.display().catch(err => {
-        document.getElementById('loading-overlay').innerHTML =
-            `<p style="color:#c00;padding:20px">Failed to load EPUB.<br><small>${err}</small></p>`;
-    });
+if (!fileUrl) {
+    document.getElementById('loading').innerHTML = '<p style="color:#c00;padding:20px">Error: No book URL provided.</p>';
+    return;
+}
 
-    // ── Ready ──────────────────────────────────────────────────────────────
-    book.ready.then(() => {
-        document.getElementById('loading-overlay').classList.add('gone');
+// Register PWA service worker
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 
-        // Title
-        let title = 'Untitled';
-        try {
-            const m = book.packaging.metadata;
-            if (m && m.title) title = m.title;
-        } catch(_) {}
-        if (title === 'Untitled') {
-            title = decodeURIComponent(fileUrl.split('/').pop().replace('.epub',''))
-                        .replace(/-/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+let book, rendition;
+let tocEls = [], bookmarks = [], currentTheme = 'day';
+let totalSections = 0, currentCFI = null, currentChapter = '—';
+let searchMatches = [], searchIdx = 0, searchDebounce;
+let totalWords = 0, avgWPM = 250;
+let tocOpen = true, fontOpen = false, bmOpen = false, searchOpen = false;
+
+// Load persisted data
+try { bookmarks = JSON.parse(localStorage.getItem(bookKey + '_bm') || '[]'); } catch(_) {}
+try {
+    const t = localStorage.getItem(bookKey + '_theme');
+    if (t) { currentTheme = t; document.body.className = t === 'day' ? '' : t; }
+} catch(_) {}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+book = ePub(fileUrl);
+rendition = book.renderTo('viewer', { width: '100%', height: '100%', spread: 'none', flow: 'paginated' });
+rendition.display().catch(err => {
+    document.getElementById('loading').innerHTML = `<p style="color:#c00;padding:20px">Failed to load EPUB.<br><small>${err}</small></p>`;
+});
+book.ready.then(onReady).catch(() => {
+    document.getElementById('loading').innerHTML = '<p style="color:#c00;padding:20px">Failed to parse EPUB.</p>';
+});
+
+function onReady() {
+    document.getElementById('loading').classList.add('gone');
+    totalSections = book.spine.items.length;
+
+    let title = 'Untitled';
+    try { const m = book.packaging.metadata; if (m && m.title) title = m.title; } catch(_) {}
+    if (title === 'Untitled')
+        title = decodeURIComponent(fileUrl.split('/').pop().replace('.epub',''))
+                    .replace(/-/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+    document.getElementById('title-display').textContent = title;
+    document.title = title + ' — Reader';
+
+    loadTOC();
+    renderBookmarks();
+    applyFont();
+    estimateWordCount();
+    checkResume();
+}
+
+// ── Reading time estimate ──────────────────────────────────────────────────
+function estimateWordCount() {
+    const sample = book.spine.items.slice(0, Math.min(3, book.spine.items.length));
+    let count = 0, n = 0;
+    Promise.all(sample.map(item =>
+        item.load(book.load.bind(book)).then(doc => {
+            count += ((doc.body || doc).textContent || '').split(/\s+/).length;
+            n++;
+        }).catch(() => {})
+    )).then(() => { if (n) totalWords = Math.round(count / n * book.spine.items.length); });
+}
+
+function updateReadingTime(pct) {
+    if (!totalWords || pct == null) return;
+    const rem = Math.round((1 - pct) * totalWords / avgWPM);
+    document.getElementById('st-time').textContent = rem > 1 ? `${rem} min left` : 'Almost done';
+}
+
+// ── TOC ────────────────────────────────────────────────────────────────────
+function loadTOC() {
+    const toc = book.navigation && book.navigation.toc;
+    if (!toc) { document.getElementById('toc-empty').textContent = 'No contents available.'; return; }
+    const render = items => {
+        if (!items || !items.length) { document.getElementById('toc-empty').textContent = 'No contents available.'; return; }
+        try { document.getElementById('toc-empty').remove(); } catch(_) {}
+        const list = document.getElementById('toc-list');
+        function addItems(arr, depth) {
+            arr.forEach(item => {
+                const a = document.createElement('a');
+                a.className = 'toc-item' + (depth === 1 ? ' d1' : depth >= 2 ? ' d2' : '');
+                a.textContent = item.label.trim(); a.title = item.label.trim(); a.href = '#';
+                a.onclick = e => {
+                    e.preventDefault(); rendition.display(item.href); activateTOC(a);
+                    if (window.innerWidth < 640) toggleTOC();
+                };
+                list.appendChild(a);
+                tocEls.push({ el: a, href: item.href });
+                if (item.subitems && item.subitems.length) addItems(item.subitems, depth + 1);
+            });
         }
-        document.getElementById('title-display').textContent = title;
-        document.title = title + ' — Reader';
+        addItems(items, 0);
+    };
+    typeof toc.then === 'function' ? toc.then(render) : render(toc);
+}
 
-        // TOC
-        loadTOC();
-        applyFont();
-    }).catch(() => {
-        document.getElementById('loading-overlay').innerHTML =
-            '<p style="color:#c00;padding:20px">Failed to parse EPUB.</p>';
-    });
+function activateTOC(activeEl) {
+    tocEls.forEach(t => t.el.classList.remove('active'));
+    if (activeEl) activeEl.classList.add('active');
+}
 
-    // ── TOC ────────────────────────────────────────────────────────────────
-    function loadTOC() {
-        const toc = book.navigation && book.navigation.toc;
-        if (!toc) { document.getElementById('toc-empty').textContent = 'No contents available.'; return; }
-        const render = (items) => {
-            if (!items || !items.length) { document.getElementById('toc-empty').textContent = 'No contents available.'; return; }
-            try { document.getElementById('toc-empty').remove(); } catch(_) {}
-            const list = document.getElementById('toc-list');
-            function addItems(arr, depth) {
-                arr.forEach(item => {
-                    const a = document.createElement('a');
-                    a.className = 'toc-item' + (depth === 1 ? ' d1' : depth >= 2 ? ' d2' : '');
-                    a.textContent = item.label.trim();
-                    a.title = item.label.trim();
-                    a.href = '#';
-                    a.onclick = e => {
-                        e.preventDefault();
-                        rendition.display(item.href);
-                        activateTOC(a);
-                        if (window.innerWidth < 600) toggleTOC();
-                    };
-                    list.appendChild(a);
-                    tocEls.push({ el: a, href: item.href });
-                    if (item.subitems && item.subitems.length) addItems(item.subitems, depth + 1);
-                });
-            }
-            addItems(items, 0);
-        };
-        // epub.js sometimes returns a promise, sometimes an array
-        if (typeof toc.then === 'function') toc.then(render); else render(toc);
+// ── Location ───────────────────────────────────────────────────────────────
+rendition.on('relocated', loc => {
+    if (!loc) return;
+    const pct = loc.start.percentage || 0;
+    document.getElementById('prog-bar').style.width = Math.round(pct * 100) + '%';
+    document.getElementById('st-pct').textContent   = Math.round(pct * 100) + '%';
+    document.getElementById('st-sec').textContent   = `${(loc.start.index||0)+1} / ${totalSections}`;
+    currentCFI = loc.start.cfi;
+    updateReadingTime(pct);
+    try { localStorage.setItem(bookKey + '_pos', currentCFI); } catch(_) {}
+
+    const href = loc.start.href || '';
+    const match = tocEls.find(t => href && href.includes(t.href.split('#')[0]));
+    if (match) {
+        activateTOC(match.el);
+        currentChapter = match.el.textContent.trim();
+        const ch = currentChapter;
+        document.getElementById('st-ch').textContent = ch.length > 22 ? ch.slice(0, 22) + '…' : ch;
     }
+});
 
-    function activateTOC(active) {
-        tocEls.forEach(t => t.el.classList.remove('active'));
-        if (active) active.classList.add('active');
+// ── Resume ─────────────────────────────────────────────────────────────────
+function checkResume() {
+    const saved = localStorage.getItem(bookKey + '_pos');
+    if (!saved || saved === 'null') return;
+    const toast = document.getElementById('resume-toast');
+    toast.classList.add('show');
+    setTimeout(() => dismissToast(), 8000);
+}
+window.resumeReading = () => {
+    const s = localStorage.getItem(bookKey + '_pos');
+    if (s) rendition.display(s);
+    dismissToast();
+};
+window.dismissToast = () => document.getElementById('resume-toast').classList.remove('show');
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+window.go = dir => dir < 0 ? rendition.prev() : rendition.next();
+
+document.addEventListener('keyup', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowLeft'  || e.key === 'PageUp')   rendition.prev();
+    if (e.key === 'ArrowRight' || e.key === 'PageDown')  rendition.next();
+    if (e.key === 'f') toggleFS();
+    if (e.key === 'b') addBookmark();
+    if (e.key === '/') { e.preventDefault(); toggleSearch(); }
+    if (e.key === 'Escape') closeAllPanels();
+});
+
+// Swipe gestures
+let tx = 0, ty = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    const dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) < 40 || Math.abs(dy) > Math.abs(dx)) return;
+    dx < 0 ? go(1) : go(-1);
+}, { passive: true });
+
+// ── Bookmarks ──────────────────────────────────────────────────────────────
+window.addBookmark = () => {
+    if (!currentCFI || bookmarks.find(b => b.cfi === currentCFI)) return;
+    bookmarks.push({ cfi: currentCFI, chapter: currentChapter, added: new Date().toLocaleDateString() });
+    try { localStorage.setItem(bookKey + '_bm', JSON.stringify(bookmarks)); } catch(_) {}
+    renderBookmarks();
+    const btn = document.getElementById('btn-bm-add');
+    btn.classList.add('on'); setTimeout(() => btn.classList.remove('on'), 900);
+};
+
+function renderBookmarks() {
+    const list = document.getElementById('bm-list');
+    if (!bookmarks.length) {
+        list.innerHTML = '<div id="bm-empty">No bookmarks yet. Press 🔖 to save your position.</div>'; return;
     }
-
-    // ── Location / Progress ────────────────────────────────────────────────
-    let totalSections = 0;
-    book.ready.then(() => { totalSections = book.spine.items.length; });
-
-    rendition.on('relocated', loc => {
-        if (!loc) return;
-        const pct = Math.round((loc.start.percentage || 0) * 100);
-        document.getElementById('progress-bar').style.width = pct + '%';
-        document.getElementById('st-pct').textContent = pct + '%';
-
-        const idx = loc.start.index !== undefined ? loc.start.index + 1 : '—';
-        document.getElementById('st-pg').textContent = `${idx} / ${totalSections || '?'}`;
-
-        // Try to find matching TOC entry
-        const href = loc.start.href || '';
-        const match = tocEls.find(t => href && (href.includes(t.href) || t.href.includes(href.split('#')[0])));
-        if (match) {
-            activateTOC(match.el);
-            document.getElementById('st-ch').textContent = match.el.textContent.trim().substring(0, 30);
-        }
+    list.innerHTML = '';
+    bookmarks.forEach((bm, i) => {
+        const div = document.createElement('div'); div.className = 'bm-item';
+        div.innerHTML = `<div class="bm-text"><div>${bm.chapter || 'Position ' + (i+1)}</div><div class="bm-chapter">${bm.added}</div></div><button class="bm-del" onclick="deleteBM(${i})">✕</button>`;
+        div.onclick = e => { if (!e.target.classList.contains('bm-del')) { rendition.display(bm.cfi); toggleBM(); } };
+        list.appendChild(div);
     });
+}
+window.deleteBM = i => {
+    bookmarks.splice(i, 1);
+    try { localStorage.setItem(bookKey + '_bm', JSON.stringify(bookmarks)); } catch(_) {}
+    renderBookmarks();
+};
 
-    // ── Navigation ─────────────────────────────────────────────────────────
-    window.go = dir => dir < 0 ? rendition.prev() : rendition.next();
-    document.addEventListener('keyup', e => {
-        if (e.key === 'ArrowLeft')  rendition.prev();
-        if (e.key === 'ArrowRight') rendition.next();
-    });
+// ── Search ─────────────────────────────────────────────────────────────────
+window.onSearch = () => { clearTimeout(searchDebounce); searchDebounce = setTimeout(runSearch, 400); };
+function runSearch() {
+    const q = document.getElementById('search-input').value.trim();
+    const resEl = document.getElementById('search-results');
+    if (!q || q.length < 2) { resEl.textContent = ''; searchMatches = []; return; }
+    book.search(q).then(results => {
+        searchMatches = results; searchIdx = 0;
+        resEl.textContent = results.length ? `${results.length} result${results.length !== 1 ? 's' : ''}` : 'No results';
+        if (results.length) jumpSearch(0);
+    }).catch(() => { resEl.textContent = 'Search unavailable.'; });
+}
+function jumpSearch(i) {
+    if (!searchMatches.length) return;
+    searchIdx = ((i % searchMatches.length) + searchMatches.length) % searchMatches.length;
+    rendition.display(searchMatches[searchIdx].cfi);
+    document.getElementById('search-results').textContent = `${searchIdx+1} / ${searchMatches.length}`;
+}
+window.searchStep = dir => jumpSearch(searchIdx + dir);
 
-    // ── Font ───────────────────────────────────────────────────────────────
-    window.applyFont = function () {
-        const family = document.getElementById('sel-font').value;
-        const size   = +document.getElementById('sel-size').value;
-        const lhRaw  = +document.getElementById('sel-lh').value;
-        const lh     = (lhRaw / 10).toFixed(1);
-        document.getElementById('val-size').textContent = size + 'px';
-        document.getElementById('val-lh').textContent   = lh;
+// ── Font & Theme ───────────────────────────────────────────────────────────
+const THEMES = {
+    day:   { bg: '#f9f5ef', fg: '#1a1a1a' },
+    sepia: { bg: '#f4ecd8', fg: '#3b2f1e' },
+    night: { bg: '#1a1a1a', fg: '#d4cdbf' },
+};
+window.applyFont = () => {
+    const family = document.getElementById('sel-font').value;
+    const size   = +document.getElementById('sel-size').value;
+    const lhRaw  = +document.getElementById('sel-lh').value;
+    const lh     = (lhRaw / 10).toFixed(1);
+    document.getElementById('val-size').textContent = size + 'px';
+    document.getElementById('val-lh').textContent   = lh;
+    const t = THEMES[currentTheme];
+    rendition.themes.override('font-family', family);
+    rendition.themes.override('font-size', size + 'px');
+    rendition.themes.override('line-height', lh);
+    rendition.themes.override('color', t.fg);
+    rendition.themes.override('background', t.bg);
+};
+window.setTheme = theme => {
+    currentTheme = theme;
+    document.body.className = theme === 'day' ? '' : theme;
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.t-' + theme).classList.add('active');
+    applyFont();
+    try { localStorage.setItem(bookKey + '_theme', theme); } catch(_) {}
+};
+// Restore theme-btn active state on load
+document.querySelector('.t-' + currentTheme).classList.add('active');
+if (currentTheme !== 'day') document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+document.querySelector('.t-' + currentTheme)?.classList.add('active');
 
-        rendition.themes.override('font-family', family);
-        rendition.themes.override('font-size', size + 'px');
-        rendition.themes.override('line-height', lh);
-        rendition.themes.override('color', nightMode ? '#d4cdbf' : '#1a1a1a');
-        rendition.themes.override('background', nightMode ? '#1a1a1a' : '#f9f5ef');
-    };
+// ── Fullscreen ─────────────────────────────────────────────────────────────
+window.toggleFS = () => {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.() || document.documentElement.webkitRequestFullscreen?.();
+        document.getElementById('btn-fs').textContent = '✕ Full';
+    } else {
+        document.exitFullscreen?.() || document.webkitExitFullscreen?.();
+        document.getElementById('btn-fs').textContent = '⛶';
+    }
+};
 
-    window.toggleFontPanel = function () {
-        fpOpen = !fpOpen;
-        document.getElementById('font-panel').classList.toggle('open', fpOpen);
-        document.getElementById('btn-font').classList.toggle('active', fpOpen);
-    };
-    document.addEventListener('click', e => {
-        if (fpOpen && !document.getElementById('font-panel').contains(e.target)
-                   && e.target.id !== 'btn-font') {
-            fpOpen = false;
-            document.getElementById('font-panel').classList.remove('open');
-            document.getElementById('btn-font').classList.remove('active');
-        }
-    });
+// ── Panel Toggles ──────────────────────────────────────────────────────────
+window.toggleTOC = () => {
+    tocOpen = !tocOpen;
+    document.getElementById('toc-panel').classList.toggle('hidden', !tocOpen);
+    document.getElementById('btn-toc').classList.toggle('on', tocOpen);
+};
+window.toggleFont = () => {
+    fontOpen = !fontOpen; bmOpen = false;
+    document.getElementById('font-panel').classList.toggle('open', fontOpen);
+    document.getElementById('bm-panel').classList.remove('open');
+    document.getElementById('overlay').classList.toggle('open', fontOpen);
+    document.getElementById('btn-font').classList.toggle('on', fontOpen);
+    document.getElementById('btn-bm').classList.remove('on');
+};
+window.toggleBM = () => {
+    bmOpen = !bmOpen; fontOpen = false;
+    document.getElementById('bm-panel').classList.toggle('open', bmOpen);
+    document.getElementById('font-panel').classList.remove('open');
+    document.getElementById('overlay').classList.toggle('open', bmOpen);
+    document.getElementById('btn-bm').classList.toggle('on', bmOpen);
+    document.getElementById('btn-font').classList.remove('on');
+};
+window.toggleSearch = () => {
+    searchOpen = !searchOpen;
+    document.getElementById('search-bar').classList.toggle('open', searchOpen);
+    document.getElementById('btn-search').classList.toggle('on', searchOpen);
+    if (searchOpen) document.getElementById('search-input').focus();
+    else { document.getElementById('search-input').value = ''; document.getElementById('search-results').textContent = ''; }
+};
+window.closeAllPanels = () => {
+    fontOpen = bmOpen = false;
+    ['font-panel','bm-panel','overlay'].forEach(id => document.getElementById(id).classList.remove('open'));
+    ['btn-font','btn-bm'].forEach(id => document.getElementById(id).classList.remove('on'));
+};
 
-    // ── TOC toggle ─────────────────────────────────────────────────────────
-    window.toggleTOC = function () {
-        tocOpen = !tocOpen;
-        document.getElementById('toc-panel').classList.toggle('hidden', !tocOpen);
-        document.getElementById('btn-toc').classList.toggle('active', tocOpen);
-    };
-
-    // ── Night mode ─────────────────────────────────────────────────────────
-    window.toggleTheme = function () {
-        nightMode = !nightMode;
-        document.body.classList.toggle('night', nightMode);
-        document.getElementById('btn-theme').textContent = nightMode ? '◑ Day' : '◑ Night';
-        applyFont();
-    };
 })();
 </script>
 </body>
