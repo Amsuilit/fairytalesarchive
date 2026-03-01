@@ -2,7 +2,7 @@ name: Archive Auto-Update
 on:
   push:
     paths:
-      - 'pdfs/**'
+      - 'books/**'
 
 jobs:
   deploy:
@@ -18,10 +18,12 @@ jobs:
           python -c "
           import os, re, json
           
-          pdf_dir = 'pdfs'
+          books_dir = 'books'
           data_file = 'data.js'
-          if not os.path.exists(pdf_dir): os.makedirs(pdf_dir)
-          files = sorted([f for f in os.listdir(pdf_dir) if f.endswith('.pdf')])
+          if not os.path.exists(books_dir): os.makedirs(books_dir)
+          
+          # Look for both PDFs and EPUBs
+          files = sorted([f for f in os.listdir(books_dir) if f.lower().endswith(('.pdf', '.epub'))])
           
           # 1. Load the existing database to 'remember' old metadata
           existing_db = []
@@ -45,7 +47,7 @@ jobs:
 
           new_db = []
           for f in files:
-              old_path = os.path.join(pdf_dir, f)
+              old_path = os.path.join(books_dir, f)
               
               # 2. Check if we already know this file
               if f in known_files:
@@ -53,16 +55,20 @@ jobs:
                   new_db.append(known_files[f])
                   continue
               
+              # Extract the extension so we don't accidentally turn an EPUB into a PDF
+              base_name, ext = os.path.splitext(f)
+              ext = ext.lower()
+
               # 3. If it's a new file, extract metadata from the messy filename
               title = get_tag(f, 'Title')
-              if title == 'N/A': title = f.replace('.pdf', '')
+              if title == 'N/A': title = base_name
               author = get_tag(f, 'Author')
               year = get_tag(f, 'Year')
               
               # 4. Generate a clean filename
               clean_base = re.sub(r'[^a-zA-Z0-9]+', '-', f'{title} {year}').strip('-').lower()
-              new_filename = f'{clean_base}.pdf'
-              new_path = os.path.join(pdf_dir, new_filename)
+              new_filename = f'{clean_base}{ext}'
+              new_path = os.path.join(books_dir, new_filename)
               
               # 5. Rename the file safely
               if old_path != new_path:
@@ -84,10 +90,10 @@ jobs:
               f.write('archiveData = ' + json.dumps(new_db) + ';')
           "
 
-      - name: Save Data and Renamed PDFs
+      - name: Save Data and Renamed Files
         run: |
           git config --global user.name 'Archive-Bot'
           git config --global user.email 'bot@github.com'
-          git add --all data.js pdfs/
-          git commit -m "Database updated and PDFs renamed" || exit 0
+          git add --all data.js books/
+          git commit -m "Database updated and files renamed" || exit 0
           git push

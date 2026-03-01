@@ -193,8 +193,17 @@
                         }
                     }
 
+                    // Handle EPUB vs PDF and the new "books" folder
+                    let fileLink = `books/${encodeURIComponent(book.f)}`;
+                    let targetAttr = `target="_blank"`; 
+                    
+                    if (book.f.toLowerCase().endsWith('.epub')) {
+                        fileLink = `reader.html?file=${encodeURIComponent('books/' + book.f)}`;
+                        targetAttr = ``; // Open EPUBs in the same tab
+                    }
+
                     htmlRows.push(`<tr>
-                        <td><a href="pdfs/${encodeURIComponent(book.f)}" target="_blank">${book.t}</a></td>
+                        <td><a href="${fileLink}" ${targetAttr}>${book.t}</a></td>
                         <td>${book.a}</td>
                         <td>${book.y}</td>
                     </tr>`);
