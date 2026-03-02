@@ -12,9 +12,12 @@
     <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
     <style>
         :root {
-            --bg: #f9f5ef; --text: #1a1a1a;
-            --panel: #fff; --border: #000;
-            --toolbar: #000; --toolbar-fg: #fff;
+            --bg: #ffffff;
+            --text: #000000;
+            --border: #000000;
+            --panel: #ffffff;
+            --toolbar: #000000;
+            --toolbar-fg: #ffffff;
             --toc-w: 280px;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -56,7 +59,7 @@
         }
         .overlay.open { display: block; }
 
-        /* FONT PANEL (only typography now) */
+        /* FONT PANEL */
         #font-panel {
             position: absolute; top: 0; right: 0; width: 240px; height: 100%;
             background: var(--panel); border-left: 2px solid var(--border);
@@ -73,7 +76,7 @@
         .fp-row input[type=range] { flex: 1; accent-color: #000; }
         .fp-val { min-width: 32px; text-align: right; font-size: 0.8em; }
 
-        /* THEME PANEL (new, same style as font panel) */
+        /* THEME PANEL */
         #theme-panel {
             position: absolute; top: 0; right: 0; width: 240px; height: 100%;
             background: var(--panel); border-left: 2px solid var(--border);
@@ -89,9 +92,9 @@
             cursor: pointer; font-size: 0.75em; text-align: center; transition: border-color .15s;
         }
         .theme-btn.active { border-color: #000; font-weight: bold; }
-        .theme-btn.t-day   { background: #f9f5ef; color: #1a1a1a; }
-        .theme-btn.t-sepia { background: #f4ecd8; color: #3b2f1e; }
-        .theme-btn.t-night { background: #1a1a1a; color: #d4cdbf; }
+        .theme-btn.t-day   { background: #ffffff; color: #000000; }
+        .theme-btn.t-sepia { background: #f4ecd8; color: #5c4a3a; }
+        .theme-btn.t-night { background: #1a1a1a; color: #e0e0e0; }
 
         /* BOOKMARKS PANEL */
         #bm-panel {
@@ -186,24 +189,37 @@
         }
         #resume-toast button:hover { background: #fff; color: #000; }
 
-        /* THEMES (applied to body) */
-        body.sepia { --bg: #f4ecd8; --text: #3b2f1e; --panel: #fdf5e6; --border: #8b7355; }
-        body.night { --bg: #1a1a1a; --text: #d4cdbf; --panel: #222; --border: #444; --toolbar: #111; }
+        /* THEMES – exact colors from index.html */
+        body.sepia {
+            --bg: #f4ecd8;
+            --text: #5c4a3a;
+            --border: #8b7355;
+            --panel: #fdf5e6;
+            --toolbar: #5c4a3a;
+        }
+        body.night {
+            --bg: #1a1a1a;
+            --text: #e0e0e0;
+            --border: #444444;
+            --panel: #222222;
+            --toolbar: #111111;
+        }
         body.night #prog-wrap { background: #333; }
         body.night #prog-bar  { background: #888; }
         body.night #status    { background: #111; }
         body.night .toc-item:hover  { background: #2a2a2a; }
         body.night .toc-item.active { background: #2a2a2a; border-left-color: #aaa; }
         body.night .bm-item:hover   { background: #2a2a2a; }
-        body.night .fp-row select   { background: #333; color: #d4cdbf; border-color: #555; }
+        body.night .fp-row select   { background: #333; color: #e0e0e0; border-color: #555; }
         body.night .theme-btn.t-night { border-color: #fff; }
+
         body.sepia .toc-item:hover  { background: #ede3cc; }
         body.sepia .toc-item.active { background: #ede3cc; border-left-color: #8b7355; }
-        body.sepia #status   { background: #3b2f1e; }
-        body.sepia #toolbar  { background: #3b2f1e; }
+        body.sepia #status   { background: #5c4a3a; }
+        body.sepia #toolbar  { background: #5c4a3a; }
         body.sepia #prog-wrap { background: #c4a97a; }
-        body.sepia #prog-bar  { background: #3b2f1e; }
-        body.sepia .theme-btn.t-sepia { border-color: #3b2f1e; }
+        body.sepia #prog-bar  { background: #5c4a3a; }
+        body.sepia .theme-btn.t-sepia { border-color: #5c4a3a; }
 
         /* Fullscreen: hide chrome */
         :fullscreen #toolbar,
@@ -222,12 +238,12 @@
 <body>
 
 <div id="toolbar">
-    <a href="index.html" class="btn">← Back</a>
+    <a href="index.html" class="btn">Back</a>
     <div class="sep"></div>
-    <button class="btn" id="btn-toc" onclick="toggleTOC()">☰</button>
+    <button class="btn" id="btn-toc" onclick="toggleTOC()">Contents</button>
     <span id="title-display">Loading…</span>
     <button class="btn" id="btn-theme" onclick="toggleTheme()">Theme</button>
-    <button class="btn" id="btn-bm-add" onclick="addBookmark()" title="Bookmark this position">➤</button>
+    <button class="btn" id="btn-bm-add" onclick="addBookmark()" title="Bookmark this position">Add</button>
     <button class="btn" id="btn-bm" onclick="toggleBM()">Bookmarks</button>
     <button class="btn" id="btn-font" onclick="toggleFont()">Aa</button>
     <button class="btn" id="btn-fs" onclick="toggleFS()">Full</button>
@@ -240,7 +256,7 @@
 
 <div class="overlay" id="overlay" onclick="closeAllPanels()"></div>
 
-<!-- Theme Panel (new) -->
+<!-- Theme Panel -->
 <div id="theme-panel">
     <div class="tp-section">
         <div class="tp-label">Theme</div>
@@ -252,7 +268,7 @@
     </div>
 </div>
 
-<!-- Font Panel (no theme section) -->
+<!-- Font Panel -->
 <div id="font-panel">
     <div class="fp-section">
         <div class="fp-label">Typography</div>
@@ -294,7 +310,7 @@
 
 <div id="main">
     <div id="toc-panel">
-        <div id="toc-header">☰</div>
+        <div id="toc-header">Contents</div>
         <div id="toc-list"><div id="toc-empty">Loading…</div></div>
     </div>
     <div id="viewer-wrap">
@@ -338,7 +354,7 @@ const EL = {
     progBar:      document.getElementById('prog-bar'),
     overlay:      document.getElementById('overlay'),
     fontPanel:    document.getElementById('font-panel'),
-    themePanel:   document.getElementById('theme-panel'), // new
+    themePanel:   document.getElementById('theme-panel'),
     bmPanel:      document.getElementById('bm-panel'),
     bmList:       document.getElementById('bm-list'),
     tocPanel:     document.getElementById('toc-panel'),
@@ -355,13 +371,11 @@ const EL = {
     valSize:      document.getElementById('val-size'),
     valLh:        document.getElementById('val-lh'),
     btnToc:       document.getElementById('btn-toc'),
-    btnTheme:     document.getElementById('btn-theme'), // new
+    btnTheme:     document.getElementById('btn-theme'),
     btnBmAdd:     document.getElementById('btn-bm-add'),
     btnBm:        document.getElementById('btn-bm'),
     btnFont:      document.getElementById('btn-font'),
     btnFs:        document.getElementById('btn-fs'),
-    themeBtns:    document.querySelectorAll('.theme-btn'), // includes both panels? careful: now there are two sets: one in theme panel, one in font panel? Actually we removed theme from font panel, so only theme panel has them.
-    // We'll need to get the theme panel buttons separately
     themePanelBtns: document.querySelectorAll('#theme-panel .theme-btn'),
 };
 
@@ -374,7 +388,7 @@ let book, rendition;
 let tocEls = [], bookmarks = [], currentTheme = 'day';
 let totalSections = 0, currentCFI = null, currentChapter = '—';
 let totalWords = 0;
-let tocOpen = true, fontOpen = false, bmOpen = false, themeOpen = false; // new
+let tocOpen = true, fontOpen = false, bmOpen = false, themeOpen = false;
 
 // Restore persisted state
 try { bookmarks    = JSON.parse(localStorage.getItem(bookKey + '_bm') || '[]'); } catch(_) {}
@@ -383,7 +397,6 @@ try {
     if (t) { currentTheme = t; document.body.className = t === 'day' ? '' : t; }
 } catch(_) {}
 
-// Apply active theme button in the theme panel
 EL.themePanelBtns.forEach(b => b.classList.toggle('active', b.classList.contains('t-' + currentTheme)));
 
 book = ePub(fileUrl);
@@ -560,10 +573,11 @@ window.deleteBM = i => {
     renderBookmarks();
 };
 
+// Exact colors from index.html
 const THEMES = {
-    day:   { bg: '#f9f5ef', fg: '#1a1a1a' },
-    sepia: { bg: '#f4ecd8', fg: '#3b2f1e' },
-    night: { bg: '#1a1a1a', fg: '#d4cdbf' },
+    day:   { bg: '#ffffff', fg: '#000000' },
+    sepia: { bg: '#f4ecd8', fg: '#5c4a3a' },
+    night: { bg: '#1a1a1a', fg: '#e0e0e0' },
 };
 
 window.applyFont = () => {
@@ -573,19 +587,26 @@ window.applyFont = () => {
     EL.valSize.textContent = size + 'px';
     EL.valLh.textContent   = lh;
     const t = THEMES[currentTheme];
-    rendition.themes.default({
-        'font-family': family,
-        'font-size':   size + 'px',
-        'line-height': lh,
-        'color':       t.fg,
-        'background':  t.bg,
-    });
+
+    const style = `
+        * {
+            font-family: ${family} !important;
+            font-size: ${size}px !important;
+            line-height: ${lh} !important;
+            color: ${t.fg} !important;
+            background-color: ${t.bg} !important;
+        }
+        body {
+            background-color: ${t.bg} !important;
+            color: ${t.fg} !important;
+        }
+    `;
+    rendition.themes.override(style);
 };
 
 window.setTheme = theme => {
     currentTheme = theme;
     document.body.className = theme === 'day' ? '' : theme;
-    // Update active state in theme panel only
     EL.themePanelBtns.forEach(b => b.classList.toggle('active', b.classList.contains('t-' + theme)));
     applyFont();
     try { localStorage.setItem(bookKey + '_theme', theme); } catch(_) {}
