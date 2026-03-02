@@ -5,20 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Library Archive</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="css/themes.css">
     <style>
-        /* All index‑specific styles (unchanged, except :root and [data-theme] removed – they're in themes.css) */
+        :root {
+            --bg: #ffffff;
+            --text: #000000;
+            --accent: #f4f4f4;
+            --border: #000000;
+            --hover-bg: #000000;
+            --hover-text: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #e0e0e0;
+            --accent: #2a2a2a;
+            --border: #444444;
+            --hover-bg: #e0e0e0;
+            --hover-text: #1a1a1a;
+        }
+
+        [data-theme="sepia"] {
+            --bg: #f4ecd8;
+            --text: #5c4a3a;
+            --accent: #e8dcc0;
+            --border: #8b7355;
+            --hover-bg: #5c4a3a;
+            --hover-text: #f4ecd8;
+        }
+
+        /* --- THEME ENFORCEMENT FIXES --- */
         body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Courier New", Courier, monospace;
             margin: 20px auto;
             max-width: 1100px;
             padding: 20px;
             line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
         }
+
+        /* Force inputs, buttons, and links to obey the theme text color */
+        input, button, select, textarea, a {
+            color: var(--text);
+            font-family: inherit;
+        }
+
+        /* Theme aware placeholders for the search bars */
+        ::placeholder {
+            color: var(--text);
+            opacity: 0.55;
+        }
+        ::-webkit-input-placeholder { color: var(--text); opacity: 0.55; }
+        ::-moz-placeholder { color: var(--text); opacity: 0.55; }
+        /* ------------------------------- */
+        
         .header {
             border-bottom: 3px solid var(--border);
             padding-bottom: 20px;
             margin-bottom: 20px;
         }
+
         .header-top {
             display: flex;
             justify-content: space-between;
@@ -27,32 +74,33 @@
             gap: 15px;
             margin-bottom: 15px;
         }
+
         h1 {
             margin: 0;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
+
         .theme-buttons {
             display: flex;
-            flex-wrap: wrap;
             gap: 8px;
         }
+
         .theme-btn {
             padding: 8px 16px;
             border: 2px solid var(--border);
             background: var(--bg);
-            color: var(--text);
-            font-family: inherit;
             cursor: pointer;
             font-size: 0.85em;
             font-weight: bold;
             transition: all 0.2s;
         }
-        .theme-btn:hover,
-        .theme-btn.active {
+
+        .theme-btn:hover, .theme-btn.active {
             background: var(--hover-bg);
             color: var(--hover-text);
         }
+
         .download-section {
             display: flex;
             align-items: center;
@@ -62,29 +110,27 @@
             margin-bottom: 10px;
             flex-wrap: wrap;
         }
+
         .download-btn {
             padding: 8px 16px;
             border: 2px solid var(--border);
             background: var(--bg);
-            color: var(--text);
-            font-family: inherit;
             cursor: pointer;
             font-size: 0.85em;
             font-weight: bold;
             transition: all 0.2s;
         }
-        .download-btn:hover {
+
+        .download-btn:hover, .download-btn.selected {
             background: var(--hover-bg);
             color: var(--hover-text);
         }
-        .download-btn.selected {
-            background: var(--hover-bg);
-            color: var(--hover-text);
-        }
+
         .download-info {
             font-size: 0.85em;
             font-style: italic;
         }
+
         #download-actions {
             margin-top: 10px;
             padding: 10px;
@@ -94,75 +140,83 @@
             align-items: center;
             gap: 15px;
         }
+
         #download-actions button {
             padding: 6px 12px;
             border: 2px solid var(--border);
             background: var(--bg);
-            color: var(--text);
-            font-family: inherit;
             cursor: pointer;
             font-size: 0.85em;
             font-weight: bold;
             transition: all 0.2s;
         }
+
         #download-actions button:hover {
             background: var(--hover-bg);
             color: var(--hover-text);
         }
+
         #format-selector {
             display: flex;
             align-items: center;
             gap: 15px;
             margin-left: 10px;
         }
+
         #format-selector label {
             display: flex;
             align-items: center;
             gap: 4px;
             cursor: pointer;
         }
+
         .stats {
             font-weight: bold;
             margin-top: 5px;
             font-size: 0.9em;
         }
+
         .search-panel {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 15px;
         }
+
         .search-panel input {
             padding: 10px;
             border: 2px solid var(--border);
             background: var(--bg);
-            color: var(--text);
-            font-family: inherit;
             outline: none;
             flex: 1 1 200px;
             box-sizing: border-box;
         }
+
         .year-range {
             display: flex;
             align-items: center;
             gap: 10px;
             flex: 1 1 300px;
         }
+
         .year-range input {
             min-width: 80px;
             flex: 1;
         }
+
         .table-container {
             width: 100%;
             overflow-x: auto;
             margin-top: 20px;
         }
+
         table {
             width: 100%;
             min-width: 700px;
             border-collapse: collapse;
             table-layout: fixed;
         }
+
         th {
             text-align: left;
             border-bottom: 2px solid var(--border);
@@ -173,46 +227,40 @@
             top: 0;
             user-select: none;
         }
+
         td {
             padding: 10px;
             border-bottom: 1px solid var(--accent);
             font-size: 0.9em;
         }
-        .col-title {
-            width: 35%;
-            cursor: pointer;
-        }
-        .col-author {
-            width: 30%;
-        }
-        .col-year {
-            width: 15%;
-            cursor: pointer;
-        }
-        .col-actions {
-            width: 20%;
-            text-align: left;
-        }
-        .col-title:hover,
-        .col-year:hover {
+        
+        .col-title { width: 35%; cursor: pointer; }
+        .col-author { width: 30%; }
+        .col-year { width: 15%; cursor: pointer; }
+        .col-actions { width: 20%; text-align: left; }
+
+        .col-title:hover, .col-year:hover {
             background: var(--accent);
         }
+
         .letter-divider {
             background: var(--hover-bg);
-            color: var(--hover-text);
+            color: var(--hover-text) !important; /* Force to use the contrasting hover text */
             padding: 5px 10px;
             font-weight: bold;
         }
+
         .title-text {
-            color: var(--text);
             text-decoration: none;
             font-weight: normal;
         }
+
         .action-buttons {
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
         }
+
         .action-btn {
             display: inline-block;
             font-size: 0.75em;
@@ -220,24 +268,22 @@
             border: 1px solid var(--border);
             border-radius: 3px;
             font-weight: bold;
-            color: var(--text);
             text-decoration: none;
             transition: all 0.2s;
             background: var(--bg);
             white-space: nowrap;
             cursor: pointer;
         }
-        .action-btn:hover {
+
+        .action-btn:hover, .action-btn.selected {
             background: var(--hover-bg);
             color: var(--hover-text);
         }
+
         .action-btn.read {
             border-width: 2px;
         }
-        .action-btn.selected {
-            background: var(--hover-bg);
-            color: var(--hover-text);
-        }
+
         @media (max-width: 600px) {
             .search-panel { flex-direction: column; }
             .year-range { width: 100%; }
@@ -248,18 +294,14 @@
     </style>
 </head>
 <body>
+
     <div class="header">
         <div class="header-top">
             <h1>Digital Library Archive</h1>
             <div class="theme-buttons">
-                <button class="theme-btn" data-theme="light" onclick="setTheme('light')">Light</button>
-                <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')">Dark</button>
-                <button class="theme-btn" data-theme="sepia" onclick="setTheme('sepia')">Sepia</button>
-                <button class="theme-btn" data-theme="forest" onclick="setTheme('forest')">Forest</button>
-                <button class="theme-btn" data-theme="ocean" onclick="setTheme('ocean')">Ocean</button>
-                <button class="theme-btn" data-theme="highcontrast" onclick="setTheme('highcontrast')">High Contrast</button>
-                <button class="theme-btn" data-theme="vintage" onclick="setTheme('vintage')">Vintage</button>
-                <button class="theme-btn" data-theme="monochrome" onclick="setTheme('monochrome')">Monochrome</button>
+                <button class="theme-btn active" onclick="setTheme('light')">Light</button>
+                <button class="theme-btn" onclick="setTheme('dark')">Dark</button>
+                <button class="theme-btn" onclick="setTheme('sepia')">Sepia</button>
             </div>
         </div>
 
@@ -311,8 +353,285 @@
         </table>
     </div>
 
-    <!-- Scripts -->
-    <script src="js/themes.js" defer></script>
-    <script src="js/index.js" defer></script>
+    <script>
+        let archiveData = [];
+        let currentSort = '';
+        let sortAscending = true;
+        let searchTimeout = null;
+        let downloadMode = false;
+        let selectedBooks = new Set();
+        const DOM = {};
+
+        // Theme management
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                const btnTheme = btn.textContent.toLowerCase();
+                if (btnTheme === savedTheme) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Update selected count display
+        function updateSelectedCount() {
+            const countSpan = document.getElementById('selected-count');
+            if (countSpan) countSpan.textContent = selectedBooks.size;
+            
+            const info = document.getElementById('downloadInfo');
+            if (downloadMode) {
+                info.textContent = `${selectedBooks.size} book(s) selected - Use Select buttons`;
+            }
+            
+            // Show/hide download actions based on selection
+            const downloadActions = document.getElementById('download-actions');
+            if (downloadMode && downloadActions) {
+                downloadActions.style.display = 'flex';
+                // Hide format selector initially
+                document.getElementById('format-selector').style.display = 'none';
+            } else if (downloadActions) {
+                downloadActions.style.display = 'none';
+            }
+        }
+
+        // Download mode toggle
+        function toggleDownloadMode() {
+            downloadMode = !downloadMode;
+            const btn = document.getElementById('downloadBtn');
+            const info = document.getElementById('downloadInfo');
+            const downloadActions = document.getElementById('download-actions');
+            
+            if (downloadMode) {
+                btn.classList.add('selected');
+                info.textContent = `${selectedBooks.size} book(s) selected - Use Select buttons`;
+                downloadActions.style.display = 'flex';
+                document.getElementById('format-selector').style.display = 'none';
+                render(); // ← FIX: re-render to show Select buttons immediately
+            } else {
+                btn.classList.remove('selected');
+                info.textContent = 'Click to select books for download';
+                selectedBooks.clear();
+                downloadActions.style.display = 'none';
+                render(); // remove all selected classes
+            }
+        }
+
+        // Toggle selection via the dedicated Select button
+        function toggleSelect(base, event) {
+            if (!downloadMode) return;
+            event.preventDefault();
+            
+            if (selectedBooks.has(base)) {
+                selectedBooks.delete(base);
+                event.target.classList.remove('selected');
+                event.target.textContent = 'Select';
+            } else {
+                selectedBooks.add(base);
+                event.target.classList.add('selected');
+                event.target.textContent = 'Selected';
+            }
+            
+            updateSelectedCount();
+        }
+
+        // Clear all selected books
+        function clearSelection() {
+            selectedBooks.clear();
+            updateSelectedCount();
+            render(); // reset all Select buttons
+        }
+
+        // Show format selector
+        function showFormatSelector() {
+            if (selectedBooks.size === 0) {
+                alert('No books selected.');
+                return;
+            }
+            document.getElementById('format-selector').style.display = 'flex';
+        }
+
+        // Cancel format selection
+        function cancelDownload() {
+            document.getElementById('format-selector').style.display = 'none';
+        }
+
+        // Start download with selected format
+        function startDownload() {
+            const format = document.querySelector('input[name="format"]:checked').value;
+            const booksToDownload = Array.from(selectedBooks).map(base => 
+                archiveData.find(book => book.base === base)
+            ).filter(book => book && book[format]); // only those with the format
+
+            if (booksToDownload.length === 0) {
+                alert(`None of the selected books have ${format.toUpperCase()} format.`);
+                return;
+            }
+
+            booksToDownload.forEach(book => {
+                const url = `books/${encodeURIComponent(book.base + '.' + format)}`;
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = '';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            DOM.searchTitle = document.getElementById('searchTitle');
+            DOM.searchAuthor = document.getElementById('searchAuthor');
+            DOM.yearFrom = document.getElementById('yearFrom');
+            DOM.yearTo = document.getElementById('yearTo');
+            DOM.tbody = document.getElementById('library-body');
+            DOM.countStr = document.getElementById('book-count');
+            DOM.titleHeader = document.getElementById('th-title');
+            DOM.yearHeader = document.getElementById('th-year');
+            
+            loadTheme();
+
+            document.getElementById('download-selected-btn').addEventListener('click', showFormatSelector);
+            document.getElementById('clear-selection-btn').addEventListener('click', clearSelection);
+            document.getElementById('start-download-btn').addEventListener('click', startDownload);
+            document.getElementById('cancel-download-btn').addEventListener('click', cancelDownload);
+        });
+
+        function parseYear(yearStr) {
+            if (!yearStr || yearStr === 'N/A') return 999999;
+            const isBC = yearStr.toUpperCase().includes('BC');
+            const num = parseInt(yearStr.replace(/[^0-9]/g, ''));
+            if (isNaN(num)) return 999999;
+            return isBC ? -num : num;
+        }
+
+        function debounceSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(render, 300);
+        }
+
+        function updateHeaders() {
+            DOM.titleHeader.innerText = 'TITLE';
+            DOM.yearHeader.innerText = 'YEAR';
+            const arrow = sortAscending ? ' ▲' : ' ▼';
+            if (currentSort === 'title') DOM.titleHeader.innerText = 'TITLE' + arrow;
+            if (currentSort === 'year') DOM.yearHeader.innerText = 'YEAR' + arrow;
+        }
+
+        function sortBy(field) {
+            if (currentSort === field) sortAscending = !sortAscending;
+            else { currentSort = field; sortAscending = true; }
+            archiveData.sort((a, b) => {
+                if (field === 'year') {
+                    if (a._yNum === 999999) return 1;
+                    if (b._yNum === 999999) return -1;
+                    return sortAscending ? a._yNum - b._yNum : b._yNum - a._yNum;
+                }
+                if (a._tUpper < b._tUpper) return sortAscending ? -1 : 1;
+                if (a._tUpper > b._tUpper) return sortAscending ? 1 : -1;
+                return 0;
+            });
+            updateHeaders();
+            render();
+        }
+
+        function render() {
+            const titleTerm = DOM.searchTitle.value.toUpperCase();
+            const authorTerm = DOM.searchAuthor.value.toUpperCase();
+            const yearFromStr = DOM.yearFrom.value.trim();
+            const yearToStr = DOM.yearTo.value.trim();
+            const minYear = yearFromStr ? parseYear(yearFromStr) : -999999;
+            const maxYear = yearToStr ? parseYear(yearToStr) : 999999;
+
+            const isFiltering = titleTerm || authorTerm || yearFromStr || yearToStr;
+            const showDividers = currentSort === 'title' && sortAscending && !isFiltering;
+
+            let htmlRows = [], count = 0, currentLetter = '';
+
+            archiveData.forEach(book => {
+                if (!book._tUpper.includes(titleTerm)) return;
+                if (!book._aUpper.includes(authorTerm)) return;
+                const inYear = (!yearFromStr && !yearToStr) || (book._yNum >= minYear && book._yNum <= maxYear);
+                if (!inYear) return;
+
+                if (showDividers) {
+                    const ch = book._tUpper[0];
+                    if (ch !== currentLetter) {
+                        currentLetter = ch;
+                        htmlRows.push(`<tr><td colspan="4" class="letter-divider">${ch}</td></tr>`);
+                    }
+                }
+
+                const epubLink = book.epub
+                    ? `reader.html?file=${encodeURIComponent('books/' + book.base + '.epub')}`
+                    : null;
+
+                let actionsHtml = '<div class="action-buttons">';
+                
+                if (epubLink) {
+                    actionsHtml += `<a href="${epubLink}" class="action-btn read">Read</a>`;
+                }
+                
+                if (book.rtf) {
+                    actionsHtml += `<a href="books/${encodeURIComponent(book.base + '.rtf')}" download class="action-btn">RTF</a>`;
+                }
+
+                // Select button appears only when downloadMode is true
+                if (downloadMode) {
+                    const isSelected = selectedBooks.has(book.base);
+                    const selectedClass = isSelected ? ' selected' : '';
+                    const selectText = isSelected ? 'Selected' : 'Select';
+                    actionsHtml += `<a href="#" onclick="toggleSelect('${book.base}', event)" class="action-btn${selectedClass}">${selectText}</a>`;
+                }
+                
+                actionsHtml += '</div>';
+
+                htmlRows.push(`<tr>
+                    <td><span class="title-text">${book.t}</span></td>
+                    <td>${book.a}</td>
+                    <td>${book.y}</td>
+                    <td>${actionsHtml}</td>
+                </tr>`);
+                count++;
+            });
+
+            if (count === 0) {
+                htmlRows.push(`<tr><td colspan="4" style="text-align:center;padding:30px;font-style:italic;">No matches found in the archive.</td></tr>`);
+            }
+            DOM.tbody.innerHTML = htmlRows.join('');
+            DOM.countStr.innerText = count;
+        }
+
+        function loadData() {
+            const script = document.createElement('script');
+            script.src = 'data.js?v=' + Date.now();
+            script.onload = () => {
+                archiveData.forEach(book => {
+                    book._tUpper = (book.t || '').toUpperCase();
+                    book._aUpper = (book.a || '').toUpperCase();
+                    book._yNum = parseYear(book.y);
+                });
+                sortBy('title');
+            };
+            document.head.appendChild(script);
+        }
+
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+
+        window.onload = loadData;
+    </script>
 </body>
 </html>
