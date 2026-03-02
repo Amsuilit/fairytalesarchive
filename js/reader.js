@@ -159,23 +159,29 @@
         }
     });
 
-    // Reapply font styles after each chapter change (ensures theme persists)
-    rendition.on('relocated', applyFont);
-
     function checkResume() {
         const saved = localStorage.getItem(bookKey + '_pos');
         if (!saved || saved === 'null') return;
         EL.resumeToast.classList.add('show');
         setTimeout(dismissToast, 8000);
     }
-    window.resumeReading = () => {
+
+    function resumeReading() {
         const s = localStorage.getItem(bookKey + '_pos');
         if (s) rendition.display(s);
         dismissToast();
-    };
-    window.dismissToast = () => EL.resumeToast.classList.remove('show');
+    }
+    window.resumeReading = resumeReading;
 
-    window.go = dir => dir < 0 ? rendition.prev() : rendition.next();
+    function dismissToast() {
+        EL.resumeToast.classList.remove('show');
+    }
+    window.dismissToast = dismissToast;
+
+    function go(dir) {
+        dir < 0 ? rendition.prev() : rendition.next();
+    }
+    window.go = go;
 
     document.addEventListener('keyup', e => {
         if (e.target.tagName === 'INPUT') return;
@@ -195,14 +201,15 @@
         dx < 0 ? go(1) : go(-1);
     }, { passive: true });
 
-    window.addBookmark = () => {
+    function addBookmark() {
         if (!currentCFI || bookmarks.find(b => b.cfi === currentCFI)) return;
         bookmarks.push({ cfi: currentCFI, chapter: currentChapter, added: new Date().toLocaleDateString() });
         try { localStorage.setItem(bookKey + '_bm', JSON.stringify(bookmarks)); } catch(_) {}
         renderBookmarks();
         EL.btnBmAdd.classList.add('on');
         setTimeout(() => EL.btnBmAdd.classList.remove('on'), 900);
-    };
+    }
+    window.addBookmark = addBookmark;
 
     function renderBookmarks() {
         if (!bookmarks.length) {
@@ -223,11 +230,12 @@
         EL.bmList.appendChild(frag);
     }
 
-    window.deleteBM = i => {
+    function deleteBM(i) {
         bookmarks.splice(i, 1);
         try { localStorage.setItem(bookKey + '_bm', JSON.stringify(bookmarks)); } catch(_) {}
         renderBookmarks();
-    };
+    }
+    window.deleteBM = deleteBM;
 
     const THEMES = {
         light: { bg: '#ffffff', fg: '#000000' },
@@ -240,7 +248,9 @@
         monochrome: { bg: '#eeeeee', fg: '#222222' },
     };
 
-function applyFont() {
+    function applyFont() {
+        if (!rendition) return;
+
         const family = EL.selFont.value;
         const size   = +EL.selSize.value;
         const lh     = (+EL.selLh.value / 10).toFixed(1);
@@ -251,36 +261,43 @@ function applyFont() {
         const theme = document.documentElement.getAttribute('data-theme') || 'light';
         const t = THEMES[theme] || THEMES.light;
 
-        // 1. Let epub.js handle the font size natively. 
-        // This scales the base font but preserves relative sizes for <h1>, <h2>, etc.
         rendition.themes.fontSize(size + 'px');
 
-        // 2. Force colors, line-height, and font-family on everything, 
-        // but DO NOT force font-size on the wildcard (*).
-        const style = `
-            * {
-                font-family: ${family} !important;
-                color: ${t.fg} !important;
-                background-color: transparent !important;
-                line-height: ${lh} !important;
+        const rules = {
+            '*': {
+                'font-family': `${family} !important`,
+                'color': `${t.fg} !important`,
+                'line-height': `${lh} !important`,
+                'background-color': 'transparent !important' 
+            },
+            'body': {
+                'background-color': `${t.bg} !important`,
+                'color': `${t.fg} !important`,
+                'padding-bottom': '40px !important'
+            },
+            'p': { 'font-size': `${size}px !important` },
+            'li': { 'font-size': `${size}px !important` },
+            'div': { 'font-size': `${size}px !important` },
+            'span': { 'color': `${t.fg} !important` }, 
+            
+            'h1': { 'font-size': `${Math.round(size * 1.6)}px !important` },
+            'h2': { 'font-size': `${Math.round(size * 1.4)}px !important` },
+            'h3': { 'font-size': `${Math.round(size * 1.2)}px !important` },
+            'h4, h5, h6': { 'font-size': `${Math.round(size * 1.1)}px !important` },
+            
+            'svg text': {
+                'fill': `${t.fg} !important`
             }
-            body {
-                background-color: ${t.bg} !important;
-                color: ${t.fg} !important;
-                padding-bottom: 40px !important; /* Safety padding for bottom text */
-            }
-            svg text {
-                fill: ${t.fg} !important; /* Fixes text inside SVG images/title pages */
-            }
-        `;
-        
-        rendition.themes.override(style);
-    };
+        };
+
+        rendition.themes.register('custom-reader-theme', rules);
+        rendition.themes.select('custom-reader-theme');
+    }
     window.applyFont = applyFont;
 
     window.addEventListener('themeChanged', applyFont);
 
-    window.toggleFS = () => {
+    function toggleFS() {
         if (!document.fullscreenElement) {
             (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen)
                 .call(document.documentElement);
@@ -289,15 +306,17 @@ function applyFont() {
             (document.exitFullscreen || document.webkitExitFullscreen).call(document);
             EL.btnFs.textContent = 'Full';
         }
-    };
+    }
+    window.toggleFS = toggleFS;
 
-    window.toggleTOC = () => {
+    function toggleTOC() {
         tocOpen = !tocOpen;
         EL.tocPanel.classList.toggle('hidden', !tocOpen);
         EL.btnToc.classList.toggle('on', tocOpen);
-    };
+    }
+    window.toggleTOC = toggleTOC;
 
-    window.toggleFont = () => {
+    function toggleFont() {
         fontOpen = !fontOpen; bmOpen = false; themeOpen = false;
         EL.fontPanel.classList.toggle('open', fontOpen);
         EL.bmPanel.classList.remove('open');
@@ -306,9 +325,10 @@ function applyFont() {
         EL.btnFont.classList.toggle('on', fontOpen);
         EL.btnBm.classList.remove('on');
         EL.btnTheme.classList.remove('on');
-    };
+    }
+    window.toggleFont = toggleFont;
 
-    window.toggleBM = () => {
+    function toggleBM() {
         bmOpen = !bmOpen; fontOpen = false; themeOpen = false;
         EL.bmPanel.classList.toggle('open', bmOpen);
         EL.fontPanel.classList.remove('open');
@@ -317,9 +337,10 @@ function applyFont() {
         EL.btnBm.classList.toggle('on', bmOpen);
         EL.btnFont.classList.remove('on');
         EL.btnTheme.classList.remove('on');
-    };
+    }
+    window.toggleBM = toggleBM;
 
-    window.toggleTheme = () => {
+    function toggleTheme() {
         themeOpen = !themeOpen; fontOpen = false; bmOpen = false;
         EL.themePanel.classList.toggle('open', themeOpen);
         EL.fontPanel.classList.remove('open');
@@ -328,9 +349,10 @@ function applyFont() {
         EL.btnTheme.classList.toggle('on', themeOpen);
         EL.btnFont.classList.remove('on');
         EL.btnBm.classList.remove('on');
-    };
+    }
+    window.toggleTheme = toggleTheme;
 
-    window.closeAllPanels = () => {
+    function closeAllPanels() {
         fontOpen = bmOpen = themeOpen = false;
         EL.fontPanel.classList.remove('open');
         EL.bmPanel.classList.remove('open');
@@ -339,5 +361,7 @@ function applyFont() {
         EL.btnFont.classList.remove('on');
         EL.btnBm.classList.remove('on');
         EL.btnTheme.classList.remove('on');
-    };
+    }
+    window.closeAllPanels = closeAllPanels;
+
 })();

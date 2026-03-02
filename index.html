@@ -5,34 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Library Archive</title>
     <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/themes.css">
+    
     <style>
-        :root {
-            --bg: #ffffff;
-            --text: #000000;
-            --accent: #f4f4f4;
-            --border: #000000;
-            --hover-bg: #000000;
-            --hover-text: #ffffff;
-        }
-
-        [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #e0e0e0;
-            --accent: #2a2a2a;
-            --border: #444444;
-            --hover-bg: #e0e0e0;
-            --hover-text: #1a1a1a;
-        }
-
-        [data-theme="sepia"] {
-            --bg: #f4ecd8;
-            --text: #5c4a3a;
-            --accent: #e8dcc0;
-            --border: #8b7355;
-            --hover-bg: #5c4a3a;
-            --hover-text: #f4ecd8;
-        }
-
         /* --- THEME ENFORCEMENT FIXES --- */
         body {
             background: var(--bg);
@@ -46,19 +21,15 @@
         }
 
         /* Force inputs, buttons, and links to obey the theme text color */
-        input, button, select, textarea, a {
+        input, button, select, textarea, a, th, td {
             color: var(--text);
             font-family: inherit;
         }
 
         /* Theme aware placeholders for the search bars */
-        ::placeholder {
-            color: var(--text);
-            opacity: 0.55;
-        }
+        ::placeholder { color: var(--text); opacity: 0.55; }
         ::-webkit-input-placeholder { color: var(--text); opacity: 0.55; }
         ::-moz-placeholder { color: var(--text); opacity: 0.55; }
-        /* ------------------------------- */
         
         .header {
             border-bottom: 3px solid var(--border);
@@ -84,6 +55,7 @@
         .theme-buttons {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
         .theme-btn {
@@ -245,7 +217,7 @@
 
         .letter-divider {
             background: var(--hover-bg);
-            color: var(--hover-text) !important; /* Force to use the contrasting hover text */
+            color: var(--hover-text) !important;
             padding: 5px 10px;
             font-weight: bold;
         }
@@ -280,9 +252,7 @@
             color: var(--hover-text);
         }
 
-        .action-btn.read {
-            border-width: 2px;
-        }
+        .action-btn.read { border-width: 2px; }
 
         @media (max-width: 600px) {
             .search-panel { flex-direction: column; }
@@ -302,6 +272,11 @@
                 <button class="theme-btn active" onclick="setTheme('light')">Light</button>
                 <button class="theme-btn" onclick="setTheme('dark')">Dark</button>
                 <button class="theme-btn" onclick="setTheme('sepia')">Sepia</button>
+                <button class="theme-btn" onclick="setTheme('forest')">Forest</button>
+                <button class="theme-btn" onclick="setTheme('ocean')">Ocean</button>
+                <button class="theme-btn" onclick="setTheme('highcontrast')">High Contrast</button>
+                <button class="theme-btn" onclick="setTheme('vintage')">Vintage</button>
+                <button class="theme-btn" onclick="setTheme('monochrome')">Monochrome</button>
             </div>
         </div>
 
@@ -362,7 +337,6 @@
         let selectedBooks = new Set();
         const DOM = {};
 
-        // Theme management
         function setTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
@@ -378,8 +352,8 @@
             document.documentElement.setAttribute('data-theme', savedTheme);
             
             document.querySelectorAll('.theme-btn').forEach(btn => {
-                const btnTheme = btn.textContent.toLowerCase();
-                if (btnTheme === savedTheme) {
+                const btnTheme = btn.textContent.toLowerCase().replace(' ', '');
+                if (btnTheme === savedTheme.replace(' ', '')) {
                     btn.classList.add('active');
                 } else {
                     btn.classList.remove('active');
@@ -387,7 +361,6 @@
             });
         }
 
-        // Update selected count display
         function updateSelectedCount() {
             const countSpan = document.getElementById('selected-count');
             if (countSpan) countSpan.textContent = selectedBooks.size;
@@ -397,19 +370,16 @@
                 info.textContent = `${selectedBooks.size} book(s) selected - Use Select buttons`;
             }
             
-            // Show/hide download actions based on selection
             const downloadActions = document.getElementById('download-actions');
             if (downloadMode && downloadActions) {
                 downloadActions.style.display = 'flex';
-                // Hide format selector initially
                 document.getElementById('format-selector').style.display = 'none';
             } else if (downloadActions) {
                 downloadActions.style.display = 'none';
             }
         }
 
-        // Download mode toggle
-        function toggleDownloadMode() {
+        window.toggleDownloadMode = function() {
             downloadMode = !downloadMode;
             const btn = document.getElementById('downloadBtn');
             const info = document.getElementById('downloadInfo');
@@ -420,18 +390,17 @@
                 info.textContent = `${selectedBooks.size} book(s) selected - Use Select buttons`;
                 downloadActions.style.display = 'flex';
                 document.getElementById('format-selector').style.display = 'none';
-                render(); // ← FIX: re-render to show Select buttons immediately
+                render(); 
             } else {
                 btn.classList.remove('selected');
                 info.textContent = 'Click to select books for download';
                 selectedBooks.clear();
                 downloadActions.style.display = 'none';
-                render(); // remove all selected classes
+                render(); 
             }
         }
 
-        // Toggle selection via the dedicated Select button
-        function toggleSelect(base, event) {
+        window.toggleSelect = function(base, event) {
             if (!downloadMode) return;
             event.preventDefault();
             
@@ -448,14 +417,12 @@
             updateSelectedCount();
         }
 
-        // Clear all selected books
         function clearSelection() {
             selectedBooks.clear();
             updateSelectedCount();
-            render(); // reset all Select buttons
+            render(); 
         }
 
-        // Show format selector
         function showFormatSelector() {
             if (selectedBooks.size === 0) {
                 alert('No books selected.');
@@ -464,17 +431,15 @@
             document.getElementById('format-selector').style.display = 'flex';
         }
 
-        // Cancel format selection
         function cancelDownload() {
             document.getElementById('format-selector').style.display = 'none';
         }
 
-        // Start download with selected format
         function startDownload() {
             const format = document.querySelector('input[name="format"]:checked').value;
             const booksToDownload = Array.from(selectedBooks).map(base => 
                 archiveData.find(book => book.base === base)
-            ).filter(book => book && book[format]); // only those with the format
+            ).filter(book => book && book[format]);
 
             if (booksToDownload.length === 0) {
                 alert(`None of the selected books have ${format.toUpperCase()} format.`);
@@ -518,7 +483,7 @@
             return isBC ? -num : num;
         }
 
-        function debounceSearch() {
+        window.debounceSearch = function() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(render, 300);
         }
@@ -531,7 +496,7 @@
             if (currentSort === 'year') DOM.yearHeader.innerText = 'YEAR' + arrow;
         }
 
-        function sortBy(field) {
+        window.sortBy = function(field) {
             if (currentSort === field) sortAscending = !sortAscending;
             else { currentSort = field; sortAscending = true; }
             archiveData.sort((a, b) => {
@@ -589,7 +554,6 @@
                     actionsHtml += `<a href="books/${encodeURIComponent(book.base + '.rtf')}" download class="action-btn">RTF</a>`;
                 }
 
-                // Select button appears only when downloadMode is true
                 if (downloadMode) {
                     const isSelected = selectedBooks.has(book.base);
                     const selectedClass = isSelected ? ' selected' : '';
@@ -619,6 +583,9 @@
             const script = document.createElement('script');
             script.src = 'data.js?v=' + Date.now();
             script.onload = () => {
+                if(window.archiveData) {
+                    archiveData = window.archiveData;
+                }
                 archiveData.forEach(book => {
                     book._tUpper = (book.t || '').toUpperCase();
                     book._aUpper = (book.a || '').toUpperCase();
