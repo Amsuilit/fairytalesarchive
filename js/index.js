@@ -231,6 +231,9 @@
         const script = document.createElement('script');
         script.src = 'data.js?v=' + Date.now();
         script.onload = () => {
+            // The data.js script defines a global variable 'archiveData'
+            // Assign it to our local variable
+            archiveData = window.archiveData;
             archiveData.forEach(book => {
                 book._tUpper = (book.t || '').toUpperCase();
                 book._aUpper = (book.a || '').toUpperCase();

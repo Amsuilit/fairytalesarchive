@@ -159,6 +159,9 @@
         }
     });
 
+    // Reapply font styles after each chapter change (ensures theme persists)
+    rendition.on('relocated', applyFont);
+
     function checkResume() {
         const saved = localStorage.getItem(bookKey + '_pos');
         if (!saved || saved === 'null') return;
