@@ -1,1 +1,213 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Library Archive</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root { --bg: #ffffff; --text: #000000; --accent: #f4f4f4; }
+        body { background: var(--bg); color: var(--text); font-family: "Courier New", Courier, monospace; margin: 20px auto; max-width: 1100px; padding: 20px; line-height: 1.6; }
+        
+        .header { border-bottom: 3px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
+        h1 { margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+        .stats { font-weight: bold; margin-top: 5px; font-size: 0.9em; }
+
+        .search-panel { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        .search-panel input { padding: 10px; border: 2px solid #000; font-family: inherit; outline: none; flex: 1 1 200px; box-sizing: border-box; }
+        .year-range { display: flex; align-items: center; gap: 10px; flex: 1 1 300px; }
+        .year-range input { min-width: 80px; flex: 1; }
+
+        .table-container { width: 100%; overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; min-width: 600px; border-collapse: collapse; table-layout: fixed; }
+        th { text-align: left; border-bottom: 2px solid #000; padding: 10px; font-size: 0.8em; background: #fff; position: sticky; top: 0; user-select: none; }
+        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        .col-title  { width: 45%; cursor: pointer; }
+        .col-author { width: 35%; }
+        .col-year   { width: 20%; cursor: pointer; }
+
+        .col-title:hover, .col-year:hover { background: #f0f0f0; }
+        .letter-divider { background: #000; color: #fff; padding: 5px 10px; font-weight: bold; }
+        a { color: #000; text-decoration: none; font-weight: bold; }
+        a:hover { background: #000; color: #fff; }
+
+        .format-links { display: inline-flex; gap: 5px; margin-left: 10px; vertical-align: middle; }
+        .format-links a { font-size: 0.75em; padding: 2px 6px; border: 1px solid #000; border-radius: 3px; font-weight: normal; color: #000; text-decoration: none; }
+        .format-links a:hover { background: #000; color: #fff; }
+
+        @media (max-width: 600px) {
+            .search-panel { flex-direction: column; }
+            .year-range { width: 100%; }
+            body { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Digital Library Archive</h1>
+        <div class="stats">Total Items: [<span id="book-count">0</span>]</div>
+        
+        <div class="search-panel">
+            <input type="search" id="searchTitle"  oninput="debounceSearch()" placeholder="Filter by Title...">
+            <input type="search" id="searchAuthor" oninput="debounceSearch()" placeholder="Filter by Author...">
+            <div class="year-range">
+                <input type="text" id="yearFrom" oninput="debounceSearch()" placeholder="Year From">
+                <span>—</span>
+                <input type="text" id="yearTo"   oninput="debounceSearch()" placeholder="Year To">
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-title"  id="th-title" onclick="sortBy('title')">TITLE</th>
+                    <th class="col-author">AUTHOR/AUTHOR'S</th>
+                    <th class="col-year"   id="th-year"  onclick="sortBy('year')">YEAR</th>
+                </tr>
+            </thead>
+            <tbody id="library-body"></tbody>
+        </table>
+    </div>
+
+    <script>
+        let archiveData   = [];
+        let currentSort   = '';
+        let sortAscending = true;
+        let searchTimeout = null;
+        const DOM = {};
+
+        window.addEventListener('DOMContentLoaded', () => {
+            DOM.searchTitle  = document.getElementById('searchTitle');
+            DOM.searchAuthor = document.getElementById('searchAuthor');
+            DOM.yearFrom     = document.getElementById('yearFrom');
+            DOM.yearTo       = document.getElementById('yearTo');
+            DOM.tbody        = document.getElementById('library-body');
+            DOM.countStr     = document.getElementById('book-count');
+            DOM.titleHeader  = document.getElementById('th-title');
+            DOM.yearHeader   = document.getElementById('th-year');
+        });
+
+        function parseYear(yearStr) {
+            if (!yearStr || yearStr === 'N/A') return 999999;
+            const isBC = yearStr.toUpperCase().includes('BC');
+            const num  = parseInt(yearStr.replace(/[^0-9]/g, ''));
+            if (isNaN(num)) return 999999;
+            return isBC ? -num : num;
+        }
+
+        function debounceSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(render, 300);
+        }
+
+        function updateHeaders() {
+            DOM.titleHeader.innerText = 'TITLE';
+            DOM.yearHeader.innerText  = 'YEAR';
+            const arrow = sortAscending ? ' ▲' : ' ▼';
+            if (currentSort === 'title') DOM.titleHeader.innerText = 'TITLE' + arrow;
+            if (currentSort === 'year')  DOM.yearHeader.innerText  = 'YEAR'  + arrow;
+        }
+
+        function sortBy(field) {
+            if (currentSort === field) sortAscending = !sortAscending;
+            else { currentSort = field; sortAscending = true; }
+            archiveData.sort((a, b) => {
+                if (field === 'year') {
+                    if (a._yNum === 999999) return 1;
+                    if (b._yNum === 999999) return -1;
+                    return sortAscending ? a._yNum - b._yNum : b._yNum - a._yNum;
+                }
+                if (a._tUpper < b._tUpper) return sortAscending ? -1 : 1;
+                if (a._tUpper > b._tUpper) return sortAscending ?  1 : -1;
+                return 0;
+            });
+            updateHeaders();
+            render();
+        }
+
+        function render() {
+            const titleTerm  = DOM.searchTitle.value.toUpperCase();
+            const authorTerm = DOM.searchAuthor.value.toUpperCase();
+            const yearFromStr = DOM.yearFrom.value.trim();
+            const yearToStr   = DOM.yearTo.value.trim();
+            const minYear = yearFromStr ? parseYear(yearFromStr) : -999999;
+            const maxYear = yearToStr   ? parseYear(yearToStr)   :  999999;
+
+            const isFiltering  = titleTerm || authorTerm || yearFromStr || yearToStr;
+            const showDividers = currentSort === 'title' && sortAscending && !isFiltering;
+
+            let htmlRows = [], count = 0, currentLetter = '';
+
+            archiveData.forEach(book => {
+                if (!book._tUpper.includes(titleTerm))  return;
+                if (!book._aUpper.includes(authorTerm)) return;
+                const inYear = (!yearFromStr && !yearToStr) || (book._yNum >= minYear && book._yNum <= maxYear);
+                if (!inYear) return;
+
+                if (showDividers) {
+                    const ch = book._tUpper[0];
+                    if (ch !== currentLetter) {
+                        currentLetter = ch;
+                        htmlRows.push(`<tr><td colspan="3" class="letter-divider">${ch}</td></tr>`);
+                    }
+                }
+
+                // EPUB is always the primary link — no PDF in the new pipeline
+                const epubLink = book.epub
+                    ? `reader.html?file=${encodeURIComponent('books/' + book.base + '.epub')}`
+                    : null;
+
+                const titleHref = epubLink || '#';
+
+                // Format buttons: EPUB reader + RTF download
+                let linksHtml = '<span class="format-links">';
+                if (book.epub) linksHtml += `<a href="${epubLink}">EPUB</a>`;
+                if (book.rtf)  linksHtml += `<a href="books/${encodeURIComponent(book.base + '.rtf')}" download>RTF</a>`;
+                // Legacy PDF support (old entries in data.js)
+                if (book.pdf && !book.rtf) linksHtml += `<a href="books/${encodeURIComponent(book.base + '.pdf')}" target="_blank">PDF</a>`;
+                linksHtml += '</span>';
+
+                htmlRows.push(`<tr>
+                    <td><a href="${titleHref}">${book.t}</a> ${linksHtml}</td>
+                    <td>${book.a}</td>
+                    <td>${book.y}</td>
+                </tr>`);
+                count++;
+            });
+
+            if (count === 0) {
+                htmlRows.push(`<tr><td colspan="3" style="text-align:center;padding:30px;font-style:italic;">No matches found in the archive.</td></tr>`);
+            }
+            DOM.tbody.innerHTML  = htmlRows.join('');
+            DOM.countStr.innerText = count;
+        }
+
+        function loadData() {
+            const script  = document.createElement('script');
+            script.src    = 'data.js?v=' + Date.now();
+            script.onload = () => {
+                archiveData.forEach(book => {
+                    book._tUpper = (book.t || '').toUpperCase();
+                    book._aUpper = (book.a || '').toUpperCase();
+                    book._yNum   = parseYear(book.y);
+                });
+                sortBy('title');
+            };
+            document.head.appendChild(script);
+        }
+
+        // Register PWA service worker
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
+=======
 <td>${book.t} ${linksHtml}</td>
+>>>>>>> aec96d1a12631890278a76419247161338b27047
