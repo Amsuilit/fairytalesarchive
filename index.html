@@ -94,6 +94,7 @@
             padding: 10px 0;
             border-bottom: 2px solid var(--border);
             margin-bottom: 10px;
+            flex-wrap: wrap;
         }
 
         .download-btn {
@@ -121,6 +122,47 @@
         .download-info {
             font-size: 0.85em;
             font-style: italic;
+        }
+
+        #download-actions {
+            margin-top: 10px;
+            padding: 10px;
+            border: 2px dashed var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #download-actions button {
+            padding: 6px 12px;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        #download-actions button:hover {
+            background: var(--hover-bg);
+            color: var(--hover-text);
+        }
+
+        #format-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: 10px;
+        }
+
+        #format-selector label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
         }
 
         .stats {
@@ -243,6 +285,7 @@
             transition: all 0.2s;
             background: var(--bg);
             white-space: nowrap;
+            cursor: pointer;
         }
 
         .action-btn:hover {
@@ -294,9 +337,22 @@
 
         <div class="download-section">
             <button class="download-btn" id="downloadBtn" onclick="toggleDownloadMode()">
-                📥 Download Mode
+                Download Mode
             </button>
             <span class="download-info" id="downloadInfo">Click to select books for download</span>
+        </div>
+
+        <!-- Download actions (visible only in download mode) -->
+        <div id="download-actions" style="display: none;">
+            <span>Selected: <span id="selected-count">0</span></span>
+            <button id="download-selected-btn">Download Selected</button>
+            <button id="clear-selection-btn">Clear</button>
+            <div id="format-selector" style="display: none;">
+                <label><input type="radio" name="format" value="epub" checked> EPUB</label>
+                <label><input type="radio" name="format" value="rtf"> RTF</label>
+                <button id="start-download-btn">Download</button>
+                <button id="cancel-download-btn">Cancel</button>
+            </div>
         </div>
 
         <div class="stats">Total Items: [<span id="book-count">0</span>]</div>
@@ -322,7 +378,9 @@
                     <th class="col-actions">ACTIONS</th>
                 </tr>
             </thead>
-            <tbody id="library-body"></tbody>
+            <tbody id="library-body">
+                <tr><td colspan="4" style="text-align:center;padding:30px;font-style:italic;">Loading archive...</td></tr>
+            </tbody>
         </table>
     </div>
 
@@ -360,39 +418,114 @@
             });
         }
 
+        // Update selected count display
+        function updateSelectedCount() {
+            const countSpan = document.getElementById('selected-count');
+            if (countSpan) countSpan.textContent = selectedBooks.size;
+            
+            const info = document.getElementById('downloadInfo');
+            if (downloadMode) {
+                info.textContent = `${selectedBooks.size} book(s) selected - Use Select buttons`;
+            }
+            
+            // Show/hide download actions based on selection
+            const downloadActions = document.getElementById('download-actions');
+            if (downloadMode && downloadActions) {
+                downloadActions.style.display = 'flex';
+                // Hide format selector initially
+                document.getElementById('format-selector').style.display = 'none';
+            } else if (downloadActions) {
+                downloadActions.style.display = 'none';
+            }
+        }
+
         // Download mode toggle
         function toggleDownloadMode() {
             downloadMode = !downloadMode;
             const btn = document.getElementById('downloadBtn');
             const info = document.getElementById('downloadInfo');
+            const downloadActions = document.getElementById('download-actions');
             
             if (downloadMode) {
                 btn.classList.add('selected');
-                info.textContent = `${selectedBooks.size} book(s) selected - Click RTF buttons to select`;
+                info.textContent = `${selectedBooks.size} book(s) selected - Use Select buttons`;
+                downloadActions.style.display = 'flex';
+                // Hide format selector when entering mode
+                document.getElementById('format-selector').style.display = 'none';
             } else {
                 btn.classList.remove('selected');
                 info.textContent = 'Click to select books for download';
                 selectedBooks.clear();
-                render();
+                downloadActions.style.display = 'none';
+                render(); // re-render to remove all selected classes
             }
         }
 
-        function toggleBookSelection(base, event) {
+        // Toggle selection via the dedicated Select button
+        function toggleSelect(base, event) {
             if (!downloadMode) return;
-            
             event.preventDefault();
             
             if (selectedBooks.has(base)) {
                 selectedBooks.delete(base);
+                event.target.classList.remove('selected');
+                event.target.textContent = 'Select';
             } else {
                 selectedBooks.add(base);
+                event.target.classList.add('selected');
+                event.target.textContent = 'Selected';
             }
             
-            const info = document.getElementById('downloadInfo');
-            info.textContent = `${selectedBooks.size} book(s) selected - Click RTF buttons to select`;
-            
-            // Update button appearance
-            event.target.classList.toggle('selected');
+            updateSelectedCount();
+        }
+
+        // Clear all selected books
+        function clearSelection() {
+            selectedBooks.clear();
+            updateSelectedCount();
+            // Re-render to reset all Select buttons
+            render();
+        }
+
+        // Show format selector
+        function showFormatSelector() {
+            if (selectedBooks.size === 0) {
+                alert('No books selected.');
+                return;
+            }
+            document.getElementById('format-selector').style.display = 'flex';
+        }
+
+        // Cancel format selection
+        function cancelDownload() {
+            document.getElementById('format-selector').style.display = 'none';
+        }
+
+        // Start download with selected format
+        function startDownload() {
+            const format = document.querySelector('input[name="format"]:checked').value;
+            const booksToDownload = Array.from(selectedBooks).map(base => 
+                archiveData.find(book => book.base === base)
+            ).filter(book => book && book[format]); // only those with the format
+
+            if (booksToDownload.length === 0) {
+                alert(`None of the selected books have ${format.toUpperCase()} format.`);
+                return;
+            }
+
+            // Trigger download for each book
+            booksToDownload.forEach(book => {
+                const url = `books/${encodeURIComponent(book.base + '.' + format)}`;
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = ''; // forces download
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+
+            // Optionally clear selection after download
+            // clearSelection();
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -406,6 +539,12 @@
             DOM.yearHeader = document.getElementById('th-year');
             
             loadTheme();
+
+            // Attach event listeners for download actions
+            document.getElementById('download-selected-btn').addEventListener('click', showFormatSelector);
+            document.getElementById('clear-selection-btn').addEventListener('click', clearSelection);
+            document.getElementById('start-download-btn').addEventListener('click', startDownload);
+            document.getElementById('cancel-download-btn').addEventListener('click', cancelDownload);
         });
 
         function parseYear(yearStr) {
@@ -478,23 +617,25 @@
                     ? `reader.html?file=${encodeURIComponent('books/' + book.base + '.epub')}`
                     : null;
 
-                // Action buttons
+                // Action buttons (no emojis)
                 let actionsHtml = '<div class="action-buttons">';
                 
                 // Read button
                 if (epubLink) {
-                    actionsHtml += `<a href="${epubLink}" class="action-btn read">📖 Read</a>`;
+                    actionsHtml += `<a href="${epubLink}" class="action-btn read">Read</a>`;
                 }
                 
-                // RTF download button
+                // RTF download button (always direct download)
                 if (book.rtf) {
+                    actionsHtml += `<a href="books/${encodeURIComponent(book.base + '.rtf')}" download class="action-btn">RTF</a>`;
+                }
+
+                // Select button (only in download mode)
+                if (downloadMode) {
                     const isSelected = selectedBooks.has(book.base);
                     const selectedClass = isSelected ? ' selected' : '';
-                    if (downloadMode) {
-                        actionsHtml += `<a href="#" onclick="toggleBookSelection('${book.base}', event)" class="action-btn${selectedClass}">💾 RTF</a>`;
-                    } else {
-                        actionsHtml += `<a href="books/${encodeURIComponent(book.base + '.rtf')}" download class="action-btn">💾 RTF</a>`;
-                    }
+                    const selectText = isSelected ? 'Selected' : 'Select';
+                    actionsHtml += `<a href="#" onclick="toggleSelect('${book.base}', event)" class="action-btn${selectedClass}">${selectText}</a>`;
                 }
                 
                 actionsHtml += '</div>';
