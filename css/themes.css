@@ -1,5 +1,4 @@
-/* css/themes.css */
-
+/* css/themes.css – all theme definitions */
 :root {
     --bg: #ffffff;
     --text: #000000;
@@ -7,6 +6,9 @@
     --border: #000000;
     --hover-bg: #000000;
     --hover-text: #ffffff;
+    --panel: #ffffff;
+    --toolbar: #000000;
+    --toolbar-fg: #ffffff;
 }
 
 [data-theme="dark"] {
@@ -16,6 +18,8 @@
     --border: #444444;
     --hover-bg: #e0e0e0;
     --hover-text: #1a1a1a;
+    --panel: #222222;
+    --toolbar: #111111;
 }
 
 [data-theme="sepia"] {
@@ -25,13 +29,61 @@
     --border: #8b7355;
     --hover-bg: #5c4a3a;
     --hover-text: #f4ecd8;
+    --panel: #fdf5e6;
+    --toolbar: #5c4a3a;
 }
 
-/* Optional: base body styles that are common (can also stay in each HTML if they differ) */
-body {
-    background: var(--bg);
-    color: var(--text);
-    transition: background 0.3s, color 0.3s;
-    font-family: "Courier New", Courier, monospace;
-    /* other common styles */
+[data-theme="forest"] {
+    --bg: #2c3e2c;
+    --text: #d0d9c0;
+    --accent: #3f5e3f;
+    --border: #7a9e7a;
+    --hover-bg: #7a9e7a;
+    --hover-text: #1f2a1f;
+    --panel: #2f4a2f;
+    --toolbar: #1f2f1f;
+}
+
+[data-theme="ocean"] {
+    --bg: #003366;
+    --text: #cce6ff;
+    --accent: #004c99;
+    --border: #66aaff;
+    --hover-bg: #66aaff;
+    --hover-text: #002244;
+    --panel: #002b5e;
+    --toolbar: #001a33;
+}
+
+[data-theme="highcontrast"] {
+    --bg: #000000;
+    --text: #ffff00;
+    --accent: #333333;
+    --border: #ffffff;
+    --hover-bg: #ffff00;
+    --hover-text: #000000;
+    --panel: #111111;
+    --toolbar: #222222;
+}
+
+[data-theme="vintage"] {
+    --bg: #f2e6d8;
+    --text: #4f3a2b;
+    --accent: #dac0a1;
+    --border: #b0906a;
+    --hover-bg: #b0906a;
+    --hover-text: #f2e6d8;
+    --panel: #efe0cf;
+    --toolbar: #8b6b4d;
+}
+
+[data-theme="monochrome"] {
+    --bg: #eeeeee;
+    --text: #222222;
+    --accent: #cccccc;
+    --border: #666666;
+    --hover-bg: #666666;
+    --hover-text: #ffffff;
+    --panel: #dddddd;
+    --toolbar: #333333;
 }
