@@ -450,14 +450,14 @@
                 btn.classList.add('selected');
                 info.textContent = `${selectedBooks.size} book(s) selected - Use Select buttons`;
                 downloadActions.style.display = 'flex';
-                // Hide format selector when entering mode
                 document.getElementById('format-selector').style.display = 'none';
+                render(); // ← FIX: re-render to show Select buttons immediately
             } else {
                 btn.classList.remove('selected');
                 info.textContent = 'Click to select books for download';
                 selectedBooks.clear();
                 downloadActions.style.display = 'none';
-                render(); // re-render to remove all selected classes
+                render(); // remove all selected classes
             }
         }
 
@@ -483,8 +483,7 @@
         function clearSelection() {
             selectedBooks.clear();
             updateSelectedCount();
-            // Re-render to reset all Select buttons
-            render();
+            render(); // reset all Select buttons
         }
 
         // Show format selector
@@ -513,19 +512,15 @@
                 return;
             }
 
-            // Trigger download for each book
             booksToDownload.forEach(book => {
                 const url = `books/${encodeURIComponent(book.base + '.' + format)}`;
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = ''; // forces download
+                a.download = '';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
             });
-
-            // Optionally clear selection after download
-            // clearSelection();
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -540,7 +535,6 @@
             
             loadTheme();
 
-            // Attach event listeners for download actions
             document.getElementById('download-selected-btn').addEventListener('click', showFormatSelector);
             document.getElementById('clear-selection-btn').addEventListener('click', clearSelection);
             document.getElementById('start-download-btn').addEventListener('click', startDownload);
@@ -612,25 +606,21 @@
                     }
                 }
 
-                // EPUB reader link
                 const epubLink = book.epub
                     ? `reader.html?file=${encodeURIComponent('books/' + book.base + '.epub')}`
                     : null;
 
-                // Action buttons (no emojis)
                 let actionsHtml = '<div class="action-buttons">';
                 
-                // Read button
                 if (epubLink) {
                     actionsHtml += `<a href="${epubLink}" class="action-btn read">Read</a>`;
                 }
                 
-                // RTF download button (always direct download)
                 if (book.rtf) {
                     actionsHtml += `<a href="books/${encodeURIComponent(book.base + '.rtf')}" download class="action-btn">RTF</a>`;
                 }
 
-                // Select button (only in download mode)
+                // Select button appears only when downloadMode is true
                 if (downloadMode) {
                     const isSelected = selectedBooks.has(book.base);
                     const selectedClass = isSelected ? ' selected' : '';
