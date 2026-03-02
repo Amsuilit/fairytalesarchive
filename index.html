@@ -56,6 +56,7 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
+            margin-bottom: 15px;
         }
 
         h1 {
@@ -84,6 +85,42 @@
         .theme-btn:hover, .theme-btn.active {
             background: var(--hover-bg);
             color: var(--hover-text);
+        }
+
+        .download-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 10px;
+        }
+
+        .download-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .download-btn:hover {
+            background: var(--hover-bg);
+            color: var(--hover-text);
+        }
+
+        .download-btn.selected {
+            background: var(--hover-bg);
+            color: var(--hover-text);
+        }
+
+        .download-info {
+            font-size: 0.85em;
+            font-style: italic;
         }
 
         .stats {
@@ -130,7 +167,7 @@
 
         table {
             width: 100%;
-            min-width: 600px;
+            min-width: 700px;
             border-collapse: collapse;
             table-layout: fixed;
         }
@@ -150,23 +187,25 @@
             padding: 10px;
             border-bottom: 1px solid var(--accent);
             font-size: 0.9em;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
         
         .col-title {
-            width: 45%;
+            width: 35%;
             cursor: pointer;
         }
 
         .col-author {
-            width: 35%;
+            width: 30%;
         }
 
         .col-year {
-            width: 20%;
+            width: 15%;
             cursor: pointer;
+        }
+
+        .col-actions {
+            width: 20%;
+            text-align: left;
         }
 
         .col-title:hover, .col-year:hover {
@@ -186,45 +225,36 @@
             font-weight: normal;
         }
 
-        .read-btn {
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
             display: inline-block;
             font-size: 0.75em;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border: 1px solid var(--border);
             border-radius: 3px;
             font-weight: bold;
             color: var(--text);
             text-decoration: none;
-            margin-left: 10px;
             transition: all 0.2s;
             background: var(--bg);
+            white-space: nowrap;
         }
 
-        .read-btn:hover {
+        .action-btn:hover {
             background: var(--hover-bg);
             color: var(--hover-text);
         }
 
-        .format-links {
-            display: inline-flex;
-            gap: 5px;
-            margin-left: 10px;
-            vertical-align: middle;
+        .action-btn.read {
+            border-width: 2px;
         }
 
-        .format-links a {
-            font-size: 0.75em;
-            padding: 2px 6px;
-            border: 1px solid var(--border);
-            border-radius: 3px;
-            font-weight: normal;
-            color: var(--text);
-            text-decoration: none;
-            transition: all 0.2s;
-            background: var(--bg);
-        }
-
-        .format-links a:hover {
+        .action-btn.selected {
             background: var(--hover-bg);
             color: var(--hover-text);
         }
@@ -243,6 +273,10 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
+            .download-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -257,6 +291,14 @@
                 <button class="theme-btn" onclick="setTheme('sepia')">Sepia</button>
             </div>
         </div>
+
+        <div class="download-section">
+            <button class="download-btn" id="downloadBtn" onclick="toggleDownloadMode()">
+                📥 Download Mode
+            </button>
+            <span class="download-info" id="downloadInfo">Click to select books for download</span>
+        </div>
+
         <div class="stats">Total Items: [<span id="book-count">0</span>]</div>
         
         <div class="search-panel">
@@ -277,6 +319,7 @@
                     <th class="col-title" id="th-title" onclick="sortBy('title')">TITLE</th>
                     <th class="col-author">AUTHOR/AUTHOR'S</th>
                     <th class="col-year" id="th-year" onclick="sortBy('year')">YEAR</th>
+                    <th class="col-actions">ACTIONS</th>
                 </tr>
             </thead>
             <tbody id="library-body"></tbody>
@@ -288,6 +331,8 @@
         let currentSort = '';
         let sortAscending = true;
         let searchTimeout = null;
+        let downloadMode = false;
+        let selectedBooks = new Set();
         const DOM = {};
 
         // Theme management
@@ -295,19 +340,16 @@
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
             
-            // Update button states
             document.querySelectorAll('.theme-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
         }
 
-        // Load saved theme
         function loadTheme() {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
             
-            // Update button states
             document.querySelectorAll('.theme-btn').forEach(btn => {
                 const btnTheme = btn.textContent.toLowerCase();
                 if (btnTheme === savedTheme) {
@@ -316,6 +358,41 @@
                     btn.classList.remove('active');
                 }
             });
+        }
+
+        // Download mode toggle
+        function toggleDownloadMode() {
+            downloadMode = !downloadMode;
+            const btn = document.getElementById('downloadBtn');
+            const info = document.getElementById('downloadInfo');
+            
+            if (downloadMode) {
+                btn.classList.add('selected');
+                info.textContent = `${selectedBooks.size} book(s) selected - Click RTF buttons to select`;
+            } else {
+                btn.classList.remove('selected');
+                info.textContent = 'Click to select books for download';
+                selectedBooks.clear();
+                render();
+            }
+        }
+
+        function toggleBookSelection(base, event) {
+            if (!downloadMode) return;
+            
+            event.preventDefault();
+            
+            if (selectedBooks.has(base)) {
+                selectedBooks.delete(base);
+            } else {
+                selectedBooks.add(base);
+            }
+            
+            const info = document.getElementById('downloadInfo');
+            info.textContent = `${selectedBooks.size} book(s) selected - Click RTF buttons to select`;
+            
+            // Update button appearance
+            event.target.classList.toggle('selected');
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -392,35 +469,47 @@
                     const ch = book._tUpper[0];
                     if (ch !== currentLetter) {
                         currentLetter = ch;
-                        htmlRows.push(`<tr><td colspan="3" class="letter-divider">${ch}</td></tr>`);
+                        htmlRows.push(`<tr><td colspan="4" class="letter-divider">${ch}</td></tr>`);
                     }
                 }
 
-                // EPUB is the primary format
+                // EPUB reader link
                 const epubLink = book.epub
                     ? `reader.html?file=${encodeURIComponent('books/' + book.base + '.epub')}`
                     : null;
 
-                // Read button (only if EPUB exists)
-                const readBtn = epubLink 
-                    ? `<a href="${epubLink}" class="read-btn">Read</a>`
-                    : '';
-
-                // Additional format downloads
-                let linksHtml = '<span class="format-links">';
-                if (book.rtf) linksHtml += `<a href="books/${encodeURIComponent(book.base + '.rtf')}" download>RTF</a>`;
-                linksHtml += '</span>';
+                // Action buttons
+                let actionsHtml = '<div class="action-buttons">';
+                
+                // Read button
+                if (epubLink) {
+                    actionsHtml += `<a href="${epubLink}" class="action-btn read">📖 Read</a>`;
+                }
+                
+                // RTF download button
+                if (book.rtf) {
+                    const isSelected = selectedBooks.has(book.base);
+                    const selectedClass = isSelected ? ' selected' : '';
+                    if (downloadMode) {
+                        actionsHtml += `<a href="#" onclick="toggleBookSelection('${book.base}', event)" class="action-btn${selectedClass}">💾 RTF</a>`;
+                    } else {
+                        actionsHtml += `<a href="books/${encodeURIComponent(book.base + '.rtf')}" download class="action-btn">💾 RTF</a>`;
+                    }
+                }
+                
+                actionsHtml += '</div>';
 
                 htmlRows.push(`<tr>
-                    <td><span class="title-text">${book.t}</span>${readBtn} ${linksHtml}</td>
+                    <td><span class="title-text">${book.t}</span></td>
                     <td>${book.a}</td>
                     <td>${book.y}</td>
+                    <td>${actionsHtml}</td>
                 </tr>`);
                 count++;
             });
 
             if (count === 0) {
-                htmlRows.push(`<tr><td colspan="3" style="text-align:center;padding:30px;font-style:italic;">No matches found in the archive.</td></tr>`);
+                htmlRows.push(`<tr><td colspan="4" style="text-align:center;padding:30px;font-style:italic;">No matches found in the archive.</td></tr>`);
             }
             DOM.tbody.innerHTML = htmlRows.join('');
             DOM.countStr.innerText = count;
