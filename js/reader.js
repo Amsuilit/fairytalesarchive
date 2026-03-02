@@ -240,30 +240,43 @@
         monochrome: { bg: '#eeeeee', fg: '#222222' },
     };
 
-    window.applyFont = () => {
+function applyFont() {
         const family = EL.selFont.value;
         const size   = +EL.selSize.value;
         const lh     = (+EL.selLh.value / 10).toFixed(1);
+        
         EL.valSize.textContent = size + 'px';
         EL.valLh.textContent   = lh;
+        
         const theme = document.documentElement.getAttribute('data-theme') || 'light';
         const t = THEMES[theme] || THEMES.light;
 
+        // 1. Let epub.js handle the font size natively. 
+        // This scales the base font but preserves relative sizes for <h1>, <h2>, etc.
+        rendition.themes.fontSize(size + 'px');
+
+        // 2. Force colors, line-height, and font-family on everything, 
+        // but DO NOT force font-size on the wildcard (*).
         const style = `
             * {
                 font-family: ${family} !important;
-                font-size: ${size}px !important;
-                line-height: ${lh} !important;
                 color: ${t.fg} !important;
-                background-color: ${t.bg} !important;
+                background-color: transparent !important;
+                line-height: ${lh} !important;
             }
             body {
                 background-color: ${t.bg} !important;
                 color: ${t.fg} !important;
+                padding-bottom: 40px !important; /* Safety padding for bottom text */
+            }
+            svg text {
+                fill: ${t.fg} !important; /* Fixes text inside SVG images/title pages */
             }
         `;
+        
         rendition.themes.override(style);
     };
+    window.applyFont = applyFont;
 
     window.addEventListener('themeChanged', applyFont);
 
