@@ -22,11 +22,12 @@
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
 
-        document.querySelectorAll('.theme-btn').forEach(btn => {
-            const btnTheme = btn.getAttribute('data-theme');
-            btn.classList.toggle('active', btnTheme === theme);
+        // Auto-fix: Update all theme dropdowns on the page to show the correct selection
+        document.querySelectorAll('.theme-select-dropdown').forEach(select => {
+            select.value = theme;
         });
 
+        // Tell the ePub reader to update its inner colors
         window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
     };
 
@@ -35,28 +36,37 @@
         document.documentElement.setAttribute('data-theme', savedTheme);
     };
 
-    window.generateThemeButtons = function(containerId) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        
-        container.innerHTML = ''; 
+    // Auto-fix: This function finds empty <select> menus and builds the options dynamically
+    window.generateThemeDropdowns = function() {
         const savedTheme = localStorage.getItem('theme') || 'light';
-
-        Object.keys(window.THEME_CONFIG).forEach(themeId => {
-            const config = window.THEME_CONFIG[themeId];
-            const btn = document.createElement('button');
+        
+        document.querySelectorAll('.theme-select-dropdown').forEach(select => {
+            select.innerHTML = ''; // Clear just in case
             
-            btn.className = `theme-btn ${themeId === savedTheme ? 'active' : ''}`;
-            btn.setAttribute('data-theme', themeId);
-            btn.textContent = config.name;
-            btn.onclick = () => window.setTheme(themeId);
+            Object.keys(window.THEME_CONFIG).forEach(themeId => {
+                const config = window.THEME_CONFIG[themeId];
+                const opt = document.createElement('option');
+                opt.value = themeId;
+                opt.textContent = config.name;
+                select.appendChild(opt);
+            });
             
-            container.appendChild(btn);
+            select.value = savedTheme;
+            select.onchange = (e) => window.setTheme(e.target.value);
         });
     };
 
-    document.addEventListener('DOMContentLoaded', () => {
+    // Initialization Function
+    function initThemes() {
         window.loadTheme();
-        window.generateThemeButtons('theme-button-container'); 
-    });
+        window.generateThemeDropdowns();
+    }
+
+    // Bulletproof trigger: checks if the page is already loaded before waiting for the event
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initThemes);
+    } else {
+        initThemes();
+    }
+
 })();
