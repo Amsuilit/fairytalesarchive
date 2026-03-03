@@ -1,1 +1,1 @@
-
+archiveData = [{"t": "The Great Gatsby", "a": "F. Scott Fitzgerald", "y": "1925", "base": "the-great-gatsby-1925", "rtf": true, "epub": true}];
