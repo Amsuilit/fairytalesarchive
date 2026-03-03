@@ -72,19 +72,6 @@
         .fp-row input[type=range] { flex: 1; accent-color: #000; }
         .fp-val { min-width: 32px; text-align: right; font-size: 0.8em; }
 
-        /* Match the Index page buttons perfectly */
-        .theme-btns { display: flex; flex-wrap: wrap; gap: 8px; }
-        .theme-btn {
-            flex: 1 0 calc(50% - 4px); padding: 8px; 
-            border: 2px solid var(--border); border-radius: 4px; 
-            background: var(--bg); color: var(--text); 
-            cursor: pointer; font-size: 0.75em; text-align: center; transition: all .15s;
-        }
-        .theme-btn:hover, .theme-btn.active { 
-            background: var(--hover-bg); 
-            color: var(--hover-text); 
-        }
-
         #bm-list { overflow-y: auto; flex: 1; }
         .bm-item { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; cursor: pointer; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
         .bm-item:hover { background: rgba(128,128,128,0.1); }
@@ -209,7 +196,10 @@
         <button class="panel-close" onclick="toggleTheme()">✕</button>
     </div>
     <div class="tp-section">
-        <div id="theme-button-container" class="theme-btns"></div>
+        <div class="fp-row">
+            <label>Color</label>
+            <select class="theme-select-dropdown"></select>
+        </div>
     </div>
 </div>
 
